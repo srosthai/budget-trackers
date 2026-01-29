@@ -296,6 +296,41 @@ html.light input[type="date"] {
   color-scheme: light !important;
 }
 
+/* ========================================
+   iOS DATE INPUT FIX
+   ======================================== */
+
+/* iOS Safari date input styling */
+input[type="date"] {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  position: relative;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+/* iOS date input text color fix */
+input[type="date"]::-webkit-date-and-time-value {
+  text-align: left;
+  color: white;
+}
+
+html.light input[type="date"]::-webkit-date-and-time-value {
+  color: #0f172a;
+}
+
+/* Hide default iOS calendar icon and use custom styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.6;
+  cursor: pointer;
+  filter: invert(1);
+}
+
+html.light input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0);
+}
+
 /* Select dropdown text */
 html.light .text-gray-300 {
   color: #334155 !important;

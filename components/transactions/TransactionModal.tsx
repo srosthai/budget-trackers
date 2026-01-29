@@ -209,7 +209,8 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full h-11 sm:h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none [color-scheme:dark]"
+                            className="w-full h-11 sm:h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none [color-scheme:dark] appearance-none [-webkit-appearance:none]"
+                            style={{ colorScheme: 'dark' }}
                         />
                     </div>
 
