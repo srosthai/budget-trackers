@@ -1,8 +1,8 @@
 // =====================================================
 // TRANSACTIONS API
 // 
-// GET    /api/transactions   - Get all user transactions
-// POST   /api/transactions   - Create new transaction
+// GET    /api/transactions      - Get transactions (with filters)
+// POST   /api/transactions      - Create new transaction
 // =====================================================
 
 import { NextRequest, NextResponse } from 'next/server';
@@ -10,165 +10,97 @@ import { auth } from '@/lib/auth';
 import { getRowsWhere, addRow, SHEETS } from '@/lib/sheets';
 import { generateId } from '@/lib/utils';
 
-interface Transaction {
+export interface Transaction {
+    [key: string]: unknown;
     transactionId: string;
     userId: string;
-    type: 'income' | 'expense' | 'transfer';
+    type: 'income' | 'expense';
     date: string;
     amount: number;
     currency: string;
-    accountId: string;
-    categoryId: string;
-    fromAccountId: string;
-    toAccountId: string;
-    note: string;
-    tags: string;
-    receiptUrl: string;
+    categoryId?: string;
+    note?: string;
+    tags?: string;
+    receiptUrl?: string;
     createdAt: string;
     updatedAt: string;
 }
 
-// GET - List all transactions for current user
+// GET - List transactions filterable by date range, category
 export async function GET(request: NextRequest) {
     try {
         const session = await auth();
+        if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const { searchParams } = new URL(request.url);
-        const limit = parseInt(searchParams.get('limit') || '50');
-        const offset = parseInt(searchParams.get('offset') || '0');
-        const type = searchParams.get('type'); // income, expense, transfer
-        const accountId = searchParams.get('accountId');
+        const searchParams = request.nextUrl.searchParams;
         const categoryId = searchParams.get('categoryId');
-        const startDate = searchParams.get('startDate');
-        const endDate = searchParams.get('endDate');
+        const type = searchParams.get('type');
+        const fromDate = searchParams.get('startDate'); // Match typical params
+        const toDate = searchParams.get('endDate');
 
-        let transactions = await getRowsWhere<Transaction>(SHEETS.TRANSACTIONS, {
+        const allTransactions = await getRowsWhere<Transaction>(SHEETS.TRANSACTIONS, {
             userId: session.user.id,
         });
 
-        // Apply filters
-        if (type) {
-            transactions = transactions.filter((t) => t.type === type);
+        let filtered = allTransactions;
+
+        if (categoryId) filtered = filtered.filter(t => t.categoryId === categoryId);
+        if (type) filtered = filtered.filter(t => t.type === type);
+
+        if (fromDate) {
+            filtered = filtered.filter(t => new Date(t.date) >= new Date(fromDate));
         }
-        if (accountId) {
-            transactions = transactions.filter((t) => t.accountId === accountId);
-        }
-        if (categoryId) {
-            transactions = transactions.filter((t) => t.categoryId === categoryId);
-        }
-        if (startDate) {
-            transactions = transactions.filter((t) => t.date >= startDate);
-        }
-        if (endDate) {
-            transactions = transactions.filter((t) => t.date <= endDate);
+        if (toDate) {
+            filtered = filtered.filter(t => new Date(t.date) <= new Date(toDate));
         }
 
-        // Sort by date (newest first)
-        transactions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        // Sort by date desc
+        filtered.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-        // Apply pagination
-        const total = transactions.length;
-        transactions = transactions.slice(offset, offset + limit);
-
-        return NextResponse.json({
-            transactions,
-            pagination: { total, limit, offset },
-        });
+        return NextResponse.json({ transactions: filtered });
     } catch (error) {
         console.error('Error fetching transactions:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch transactions' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }
 
-// POST - Create new transaction
+// POST - Create transaction
 export async function POST(request: NextRequest) {
     try {
         const session = await auth();
-
-        if (!session?.user?.id) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        if (!session?.user?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         const body = await request.json();
-        const {
-            type,
-            date,
-            amount,
-            currency = 'USD',
-            accountId,
-            categoryId = '',
-            fromAccountId = '',
-            toAccountId = '',
-            note = '',
-            tags = '',
-            receiptUrl = '',
-        } = body;
+        const { type, amount, date, categoryId, note, tags } = body;
 
-        // Validation
-        if (!type || !date || amount === undefined) {
-            return NextResponse.json(
-                { error: 'Type, date, and amount are required' },
-                { status: 400 }
-            );
+        if (!type || !amount || !date) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        if (!['income', 'expense', 'transfer'].includes(type)) {
-            return NextResponse.json(
-                { error: 'Type must be "income", "expense", or "transfer"' },
-                { status: 400 }
-            );
-        }
+        const numAmount = Number(amount);
 
-        if (type === 'transfer' && (!fromAccountId || !toAccountId)) {
-            return NextResponse.json(
-                { error: 'Transfer requires fromAccountId and toAccountId' },
-                { status: 400 }
-            );
-        }
-
-        if (['income', 'expense'].includes(type) && !accountId) {
-            return NextResponse.json(
-                { error: 'AccountId is required for income/expense' },
-                { status: 400 }
-            );
-        }
-
-        const newTransaction: Transaction = {
-            transactionId: generateId('txn'),
+        const transaction: Transaction = {
+            transactionId: generateId('tx'),
             userId: session.user.id,
             type,
             date,
-            amount: Number(amount),
-            currency,
-            accountId: accountId || '',
+            amount: numAmount,
+            currency: body.currency || 'USD',
             categoryId,
-            fromAccountId,
-            toAccountId,
-            note,
-            tags: Array.isArray(tags) ? tags.join(',') : tags,
-            receiptUrl,
+            note: note || '',
+            tags: tags || '',
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         };
 
-        await addRow(SHEETS.TRANSACTIONS, newTransaction);
+        // 1. Save Transaction
+        await addRow(SHEETS.TRANSACTIONS, transaction);
 
-        return NextResponse.json(
-            { success: true, transaction: newTransaction },
-            { status: 201 }
-        );
+        // No account balance updates needed
+
+        return NextResponse.json({ success: true, transaction }, { status: 201 });
     } catch (error) {
         console.error('Error creating transaction:', error);
-        return NextResponse.json(
-            { error: 'Failed to create transaction' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed' }, { status: 500 });
     }
 }

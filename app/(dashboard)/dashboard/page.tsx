@@ -1,278 +1,362 @@
 'use client';
 
-import { DashboardLayout } from '@/components/layout';
-import { Card, Badge, Icons, Button } from '@/components/ui';
+import { useDashboard } from '@/hooks';
+import {
+    BalanceCard,
+    StatsRow,
+    SpendingChart,
+    RecentTransactions,
+    MobileHeader,
+    BottomNavigation,
+    FloatingActionButton,
+} from '@/components/dashboard';
+import { Icons } from '@/components/ui';
 
 // =====================================================
 // DASHBOARD PAGE
 // 
-// Main dashboard with:
-// - Stat cards (Income, Expense, Profit)
-// - Recent transactions list
-// - Top spending categories
-// - Quick actions
+// Mobile-first design following reference image
+// Desktop: Shows with sidebar layout
+// Mobile: Full-width with bottom navigation
+// 
+// Architecture:
+// - useDashboard hook: Data fetching & state
+// - Components: Presentational only
+// - Page: Composition layer
 // =====================================================
 
-// Mock data for static UI
-const stats = [
-    {
-        label: 'Total Income',
-        value: '$4,250.00',
-        change: '+12.5%',
-        trend: 'up' as const,
-        icon: 'ArrowDown' as const,
-        color: 'income',
-    },
-    {
-        label: 'Total Expense',
-        value: '$2,180.00',
-        change: '+5.2%',
-        trend: 'up' as const,
-        icon: 'ArrowUp' as const,
-        color: 'expense',
-    },
-    {
-        label: 'Net Profit',
-        value: '$2,070.00',
-        change: '+18.3%',
-        trend: 'up' as const,
-        icon: 'TrendingUp' as const,
-        color: 'primary',
-    },
-    {
-        label: 'Total Balance',
-        value: '$12,450.00',
-        change: '+8.1%',
-        trend: 'up' as const,
-        icon: 'Wallet' as const,
-        color: 'transfer',
-    },
-];
-
-const recentTransactions = [
-    {
-        id: '1',
-        description: 'Salary - January',
-        category: 'Salary',
-        type: 'income' as const,
-        amount: 3500,
-        date: '2026-01-28',
-        account: 'ABA Bank',
-    },
-    {
-        id: '2',
-        description: 'Coffee & Snacks',
-        category: 'Food & Drinks',
-        type: 'expense' as const,
-        amount: 12.50,
-        date: '2026-01-28',
-        account: 'Cash',
-    },
-    {
-        id: '3',
-        description: 'Electricity Bill',
-        category: 'Utilities',
-        type: 'expense' as const,
-        amount: 85.00,
-        date: '2026-01-27',
-        account: 'ABA Bank',
-    },
-    {
-        id: '4',
-        description: 'Freelance Project',
-        category: 'Freelance',
-        type: 'income' as const,
-        amount: 750,
-        date: '2026-01-26',
-        account: 'PayPal',
-    },
-    {
-        id: '5',
-        description: 'Transfer to Savings',
-        category: 'Transfer',
-        type: 'transfer' as const,
-        amount: 500,
-        date: '2026-01-25',
-        account: 'ABA → ACLEDA',
-    },
-];
-
-const topCategories = [
-    { name: 'Food & Drinks', amount: 450, budget: 600, percentage: 75 },
-    { name: 'Transport', amount: 280, budget: 300, percentage: 93 },
-    { name: 'Entertainment', amount: 150, budget: 200, percentage: 75 },
-    { name: 'Shopping', amount: 320, budget: 500, percentage: 64 },
-    { name: 'Utilities', amount: 185, budget: 200, percentage: 93 },
-];
-
-const accounts = [
-    { name: 'Cash', balance: 450.00, color: '#22c55e' },
-    { name: 'ABA Bank', balance: 8750.00, color: '#0066b2' },
-    { name: 'ACLEDA', balance: 2850.00, color: '#ffc107' },
-    { name: 'PayPal', balance: 400.00, color: '#00457c' },
-];
-
 export default function DashboardPage() {
+    const {
+        stats,
+        accounts,
+        recentTransactions,
+        isLoading,
+        showBalance,
+        toggleBalanceVisibility,
+    } = useDashboard();
+
+    // Use total balance from stats
+    const totalBalance = stats?.totalBalance.amount || 0;
+
+    if (isLoading) {
+        return <LoadingSkeleton />;
+    }
+
     return (
-        <DashboardLayout title="Dashboard" subtitle="January 2026">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                {stats.map((stat, index) => {
-                    const Icon = Icons[stat.icon];
-                    return (
-                        <Card
-                            key={stat.label}
-                            className={`stat-card animate-slide-up delay-${(index + 1) * 100}`}
-                            padding="md"
-                        >
-                            <div className="flex items-start justify-between">
-                                <div>
-                                    <p className="text-sm text-foreground-muted mb-1">{stat.label}</p>
-                                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                                    <div className="flex items-center gap-1 mt-2">
-                                        <Icons.TrendingUp className={`w-4 h-4 ${stat.trend === 'up' ? 'text-income' : 'text-expense'}`} />
-                                        <span className={`text-sm font-medium ${stat.trend === 'up' ? 'text-income' : 'text-expense'}`}>
-                                            {stat.change}
-                                        </span>
-                                        <span className="text-xs text-foreground-subtle">vs last month</span>
-                                    </div>
-                                </div>
-                                <div className={`
-                  w-12 h-12 rounded-xl flex items-center justify-center
-                  ${stat.color === 'income' ? 'bg-income/10 text-income' : ''}
-                  ${stat.color === 'expense' ? 'bg-expense/10 text-expense' : ''}
-                  ${stat.color === 'primary' ? 'bg-primary-500/10 text-primary-500' : ''}
-                  ${stat.color === 'transfer' ? 'bg-transfer/10 text-transfer' : ''}
-                `}>
-                                    <Icon className="w-6 h-6" />
-                                </div>
-                            </div>
-                        </Card>
-                    );
-                })}
+        <div className="min-h-screen bg-[#0a0f0a]">
+            {/* Mobile Layout */}
+            <div className="lg:hidden">
+                <div className="px-4 pb-24">
+                    {/* Mobile Header */}
+                    <MobileHeader />
+
+                    {/* Balance Card */}
+                    <div className="mb-4">
+                        <BalanceCard
+                            balance={totalBalance}
+                            showBalance={showBalance}
+                            onToggleVisibility={toggleBalanceVisibility}
+                            isPremium={false}
+                        />
+                    </div>
+
+                    {/* Stats Row */}
+                    <div className="mb-4">
+                        <StatsRow
+                            income={{
+                                amount: stats?.income.amount || 0,
+                                change: stats?.income.change,
+                            }}
+                            expense={{
+                                amount: stats?.expense.amount || 0,
+                                change: stats?.expense.change,
+                            }}
+                            profit={{
+                                amount: stats?.netProfit.amount || 0,
+                            }}
+                        />
+                    </div>
+
+                    {/* Spending Chart */}
+                    <div className="mb-4">
+                        <SpendingChart
+                            amount={stats?.expense.amount || 0}
+                            change={stats?.expense.change || 0}
+                        />
+                    </div>
+
+                    {/* Recent Transactions */}
+                    <RecentTransactions transactions={recentTransactions} limit={5} />
+                </div>
+
+                {/* Bottom Navigation */}
+                <BottomNavigation />
+
+                {/* Floating Action Button */}
+                <FloatingActionButton />
+            </div>
+
+            {/* Desktop Layout - Uses DashboardLayout from parent */}
+            <div className="hidden lg:block">
+                <DesktopDashboard
+                    stats={stats}
+                    accounts={[]}
+                    recentTransactions={recentTransactions}
+                    totalBalance={totalBalance}
+                    showBalance={showBalance}
+                    toggleBalanceVisibility={toggleBalanceVisibility}
+                />
+            </div>
+        </div>
+    );
+}
+
+// =====================================================
+// DESKTOP LAYOUT COMPONENT
+// =====================================================
+
+interface DesktopDashboardProps {
+    stats: ReturnType<typeof useDashboard>['stats'];
+    accounts: ReturnType<typeof useDashboard>['accounts'];
+    recentTransactions: ReturnType<typeof useDashboard>['recentTransactions'];
+    totalBalance: number;
+    showBalance: boolean;
+    toggleBalanceVisibility: () => void;
+}
+
+function DesktopDashboard({
+    stats,
+    accounts,
+    recentTransactions,
+    totalBalance,
+    showBalance,
+    toggleBalanceVisibility,
+}: DesktopDashboardProps) {
+    const currentMonth = new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    return (
+        <div className="p-6 max-w-7xl mx-auto">
+            {/* Page Header */}
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+                <p className="text-gray-500">{currentMonth}</p>
+            </div>
+
+            {/* Top Row: Balance + Stats */}
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
+                {/* Balance Card - Takes 1 column */}
+                <div className="xl:col-span-1">
+                    <BalanceCard
+                        balance={totalBalance}
+                        showBalance={showBalance}
+                        onToggleVisibility={toggleBalanceVisibility}
+                        isPremium={false}
+                    />
+                </div>
+
+                {/* Stats - Takes 2 columns */}
+                <div className="xl:col-span-2">
+                    <div className="grid grid-cols-3 gap-4 h-full">
+                        <StatCard
+                            label="Total Income"
+                            amount={stats?.income.amount || 0}
+                            change={stats?.income.change}
+                            type="income"
+                        />
+                        <StatCard
+                            label="Total Expense"
+                            amount={stats?.expense.amount || 0}
+                            change={stats?.expense.change}
+                            type="expense"
+                        />
+                        <StatCard
+                            label="Net Profit"
+                            amount={stats?.netProfit.amount || 0}
+                            type="profit"
+                        />
+                    </div>
+                </div>
             </div>
 
             {/* Main Content Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                {/* Recent Transactions - Takes 2 columns */}
-                <Card className="xl:col-span-2" padding="none">
-                    <Card.Header className="px-6 pt-6">
-                        Recent Transactions
-                        <Button variant="ghost" size="sm">
-                            View All
-                            <Icons.ChevronRight className="w-4 h-4" />
-                        </Button>
-                    </Card.Header>
-                    <Card.Body>
-                        <div className="divide-y divide-border">
-                            {recentTransactions.map((tx) => (
-                                <div
-                                    key={tx.id}
-                                    className="flex items-center gap-4 px-6 py-4 hover:bg-background-tertiary/50 transition-colors"
-                                >
-                                    {/* Transaction Icon */}
-                                    <div className={`
-                    w-10 h-10 rounded-xl flex items-center justify-center shrink-0
-                    ${tx.type === 'income' ? 'bg-income/10' : ''}
-                    ${tx.type === 'expense' ? 'bg-expense/10' : ''}
-                    ${tx.type === 'transfer' ? 'bg-transfer/10' : ''}
-                  `}>
-                                        {tx.type === 'income' && <Icons.ArrowDown className="w-5 h-5 text-income" />}
-                                        {tx.type === 'expense' && <Icons.ArrowUp className="w-5 h-5 text-expense" />}
-                                        {tx.type === 'transfer' && <Icons.ArrowsRightLeft className="w-5 h-5 text-transfer" />}
-                                    </div>
+                {/* Left: Chart + Transactions */}
+                <div className="xl:col-span-3 space-y-6">
+                    <SpendingChart
+                        amount={stats?.expense.amount || 0}
+                        change={stats?.expense.change || 0}
+                    />
+                    <RecentTransactions transactions={recentTransactions} limit={6} />
+                </div>
 
-                                    {/* Transaction Details */}
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium text-foreground truncate">
-                                            {tx.description}
-                                        </p>
-                                        <p className="text-xs text-foreground-muted">
-                                            {tx.category} • {tx.account}
-                                        </p>
-                                    </div>
+                {/* Removed Accounts Card Column */}
+            </div>
 
-                                    {/* Amount & Date */}
-                                    <div className="text-right shrink-0">
-                                        <p className={`text-sm font-semibold ${tx.type === 'income' ? 'text-income' :
-                                                tx.type === 'expense' ? 'text-expense' :
-                                                    'text-transfer'
-                                            }`}>
-                                            {tx.type === 'income' ? '+' : tx.type === 'expense' ? '-' : ''}
-                                            ${tx.amount.toFixed(2)}
-                                        </p>
-                                        <p className="text-xs text-foreground-muted">{tx.date}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </Card.Body>
-                </Card>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                    {/* Accounts Overview */}
-                    <Card>
-                        <Card.Header>
-                            Accounts
-                            <Button variant="ghost" size="sm" icon={<Icons.Plus className="w-4 h-4" />}>
-                                Add
-                            </Button>
-                        </Card.Header>
-                        <Card.Body className="space-y-3">
-                            {accounts.map((account) => (
-                                <div
-                                    key={account.name}
-                                    className="flex items-center gap-3 p-3 rounded-xl bg-background-tertiary/50 hover:bg-background-tertiary transition-colors cursor-pointer"
-                                >
-                                    <div
-                                        className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                                        style={{ backgroundColor: account.color }}
-                                    >
-                                        {account.name.charAt(0)}
-                                    </div>
-                                    <div className="flex-1">
-                                        <p className="text-sm font-medium text-foreground">{account.name}</p>
-                                        <p className="text-xs text-foreground-muted">Active</p>
-                                    </div>
-                                    <p className="text-sm font-semibold text-foreground">
-                                        ${account.balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                                    </p>
-                                </div>
-                            ))}
-                        </Card.Body>
-                    </Card>
+            {/* Floating Action Button */}
+            <FloatingActionButton />
+        </div>
+    );
+}
 
-                    {/* Top Spending Categories */}
-                    <Card>
-                        <Card.Header>
-                            Budget Overview
-                            <Badge variant="warning" size="sm">2 near limit</Badge>
-                        </Card.Header>
-                        <Card.Body className="space-y-4">
-                            {topCategories.map((category) => (
-                                <div key={category.name} className="space-y-2">
-                                    <div className="flex items-center justify-between text-sm">
-                                        <span className="text-foreground-muted">{category.name}</span>
-                                        <span className="font-medium text-foreground">
-                                            ${category.amount} / ${category.budget}
-                                        </span>
-                                    </div>
-                                    <div className="h-2 bg-background-tertiary rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-500 ${category.percentage >= 90 ? 'bg-expense' :
-                                                    category.percentage >= 75 ? 'bg-yellow-500' :
-                                                        'bg-primary-500'
-                                                }`}
-                                            style={{ width: `${category.percentage}%` }}
-                                        />
-                                    </div>
-                                </div>
-                            ))}
-                        </Card.Body>
-                    </Card>
+// =====================================================
+// DESKTOP STAT CARD
+// =====================================================
+
+interface StatCardProps {
+    label: string;
+    amount: number;
+    change?: number;
+    type: 'income' | 'expense' | 'profit';
+}
+
+function StatCard({ label, amount, change, type }: StatCardProps) {
+    const formattedAmount = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+    }).format(amount);
+
+    const colors = {
+        income: { text: 'text-[#22c55e]', bg: 'bg-[#22c55e]/10', icon: Icons.ArrowDown },
+        expense: { text: 'text-[#ef4444]', bg: 'bg-[#ef4444]/10', icon: Icons.ArrowUp },
+        profit: { text: 'text-white', bg: 'bg-[#3b82f6]/10', icon: Icons.TrendingUp },
+    };
+
+    const config = colors[type];
+    const Icon = config.icon;
+
+    return (
+        <div className="rounded-xl bg-[#0f1610] p-5 border border-[#1a2f1a] h-full flex flex-col justify-between">
+            <div className="flex items-center justify-between mb-3">
+                <p className="text-sm text-gray-400">{label}</p>
+                <div className={`w-10 h-10 rounded-lg ${config.bg} flex items-center justify-center`}>
+                    <Icon className={`w-5 h-5 ${config.text}`} />
                 </div>
             </div>
-        </DashboardLayout>
+            <div>
+                <p className={`text-2xl font-bold ${config.text}`}>{formattedAmount}</p>
+                {change !== undefined && (
+                    <p className={`text-sm mt-1 ${change >= 0 ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>
+                        {change >= 0 ? '+' : ''}{change.toFixed(1)}% vs last month
+                    </p>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// =====================================================
+// ACCOUNTS CARD
+// =====================================================
+
+interface AccountsCardProps {
+    accounts: Array<{
+        accountId: string;
+        name: string;
+        type: string;
+        currency: string;
+        currentBalance: number;
+        color: string;
+    }>;
+}
+
+function AccountsCard({ accounts }: AccountsCardProps) {
+    return (
+        <div className="rounded-xl bg-[#0f1610] p-5 border border-[#1a2f1a]">
+            <div className="flex items-center justify-between mb-4">
+                <h3 className="text-base font-semibold text-white">Accounts</h3>
+                <button className="text-sm font-medium text-[#22c55e] hover:text-[#16a34a] transition-colors flex items-center gap-1">
+                    <Icons.Plus className="w-4 h-4" />
+                    Add
+                </button>
+            </div>
+
+            {accounts.length === 0 ? (
+                <div className="py-6 text-center">
+                    <Icons.Wallet className="w-10 h-10 mx-auto text-gray-600 mb-2" />
+                    <p className="text-gray-500 text-sm">No accounts yet</p>
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    {accounts.map((account) => {
+                        const formattedBalance = new Intl.NumberFormat('en-US', {
+                            style: 'currency',
+                            currency: account.currency || 'USD',
+                            minimumFractionDigits: 2,
+                        }).format(account.currentBalance);
+
+                        return (
+                            <div
+                                key={account.accountId}
+                                className="flex items-center gap-3 p-3 rounded-xl bg-[#0a1209] hover:bg-[#0d1610] transition-colors cursor-pointer"
+                            >
+                                <div
+                                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                                    style={{ backgroundColor: account.color || '#22c55e' }}
+                                >
+                                    {account.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-white truncate">{account.name}</p>
+                                    <p className="text-xs text-gray-500 capitalize">{account.type}</p>
+                                </div>
+                                <p className="text-sm font-semibold text-white">{formattedBalance}</p>
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// =====================================================
+// LOADING SKELETON
+// =====================================================
+
+function LoadingSkeleton() {
+    return (
+        <div className="min-h-screen bg-[#0a0f0a] p-4 lg:p-6">
+            <div className="animate-pulse space-y-4">
+                {/* Header skeleton */}
+                <div className="flex items-center gap-3 mb-6">
+                    <div className="w-11 h-11 rounded-full bg-[#1a2a1a]" />
+                    <div className="space-y-2">
+                        <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
+                        <div className="w-28 h-4 rounded bg-[#1a2a1a]" />
+                    </div>
+                </div>
+
+                {/* Balance card skeleton */}
+                <div className="h-40 rounded-2xl bg-[#0f1610] border border-[#1a2f1a]" />
+
+                {/* Stats skeleton */}
+                <div className="grid grid-cols-3 gap-3">
+                    {[1, 2, 3].map((i) => (
+                        <div key={i} className="h-24 rounded-xl bg-[#0f1610] border border-[#1a2f1a]" />
+                    ))}
+                </div>
+
+                {/* Chart skeleton */}
+                <div className="h-48 rounded-2xl bg-[#0f1610] border border-[#1a2f1a]" />
+
+                {/* Transactions skeleton */}
+                <div className="rounded-2xl bg-[#0f1610] border border-[#1a2f1a] p-5">
+                    <div className="space-y-3">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="flex items-center gap-3">
+                                <div className="w-11 h-11 rounded-xl bg-[#1a2a1a]" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="w-32 h-4 rounded bg-[#1a2a1a]" />
+                                    <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
+                                </div>
+                                <div className="w-20 h-4 rounded bg-[#1a2a1a]" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

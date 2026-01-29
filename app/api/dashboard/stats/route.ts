@@ -9,21 +9,15 @@ import { auth } from '@/lib/auth';
 import { getRowsWhere, SHEETS } from '@/lib/sheets';
 
 interface Transaction {
+    [key: string]: unknown;
     transactionId: string;
     userId: string;
-    type: 'income' | 'expense' | 'transfer';
+    type: 'income' | 'expense';
     date: string;
     amount: number;
-    accountId: string;
     categoryId: string;
 }
-
-interface Account {
-    accountId: string;
-    userId: string;
-    name: string;
-    startingBalance: number;
-}
+// Account interface removed
 
 // GET - Get dashboard statistics
 export async function GET(request: NextRequest) {
@@ -56,30 +50,19 @@ export async function GET(request: NextRequest) {
 
         const netProfit = income - expense;
 
-        // Get accounts and calculate total balance
-        const accounts = await getRowsWhere<Account>(SHEETS.ACCOUNTS, {
-            userId: session.user.id,
-        });
+        // Calculate Total Lifetime Balance
+        const totalIncome = allTransactions
+            .filter((t) => t.type === 'income')
+            .reduce((sum, t) => sum + Number(t.amount), 0);
 
-        // Calculate account balances (starting balance + income - expenses for each account)
-        const accountBalances = accounts.map((account) => {
-            const accountTransactions = allTransactions.filter((t) => t.accountId === account.accountId);
+        const totalExpense = allTransactions
+            .filter((t) => t.type === 'expense')
+            .reduce((sum, t) => sum + Number(t.amount), 0);
 
-            const accountIncome = accountTransactions
-                .filter((t) => t.type === 'income')
-                .reduce((sum, t) => sum + Number(t.amount), 0);
+        const totalBalance = totalIncome - totalExpense;
 
-            const accountExpense = accountTransactions
-                .filter((t) => t.type === 'expense')
-                .reduce((sum, t) => sum + Number(t.amount), 0);
-
-            return {
-                ...account,
-                currentBalance: Number(account.startingBalance) + accountIncome - accountExpense,
-            };
-        });
-
-        const totalBalance = accountBalances.reduce((sum, a) => sum + a.currentBalance, 0);
+        // accounts not used anymore
+        const accountBalances: any[] = [];
 
         // Calculate previous month for comparison
         const prevMonth = new Date(month + '-01');

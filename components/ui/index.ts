@@ -1,15 +1,7 @@
-// UI Components - Barrel Export
-export { Button } from './Button';
-export type { ButtonProps } from './Button';
-
-export { Input } from './Input';
-export type { InputProps } from './Input';
-
-export { Card } from './Card';
-export type { CardProps } from './Card';
-
-export { Badge } from './Badge';
-export type { BadgeProps } from './Badge';
-
-export { Icons } from './Icons';
-export type { IconName } from './Icons';
+export * from './Button';
+export * from './Icons';
+export * from './Select';
+export * from './Input';
+export * from './Card';
+export * from './Badge';
+export * from './ConfirmModal';

@@ -1,154 +1,121 @@
 'use client';
 
-import { DashboardLayout } from '@/components/layout';
-import { Card, Icons, Button, Input } from '@/components/ui';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { signOut, useSession } from 'next-auth/react';
+import { Icons } from '@/components/ui';
+import { BottomNavigation } from '@/components/dashboard';
 
 // =====================================================
-// SETTINGS PAGE
+// SETTINGS MENU PAGE
 // 
-// User preferences and app settings
+// Main hub for:
+// - Categories & Rules
+// - Account Settings
+// - App Preferences
 // =====================================================
 
 export default function SettingsPage() {
+    const router = useRouter();
+    const { data: session } = useSession();
+
+    const handleLogout = async () => {
+        await signOut({ callbackUrl: '/login' });
+    };
+
+    const userName = session?.user?.name || 'User';
+    const userEmail = session?.user?.email || 'user@example.com';
+    const userImage = session?.user?.image;
+    const initials = userName
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2);
+
     return (
-        <DashboardLayout title="Settings" subtitle="Manage your preferences">
-            <div className="max-w-3xl">
-                {/* Profile Section */}
-                <Card className="mb-6">
-                    <Card.Header>Profile</Card.Header>
-                    <Card.Body>
-                        <div className="flex flex-col sm:flex-row items-start gap-6">
-                            {/* Avatar */}
-                            <div className="relative">
-                                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white text-3xl font-bold">
-                                    T
-                                </div>
-                                <button className="absolute -bottom-2 -right-2 w-8 h-8 rounded-full bg-background-secondary border border-border flex items-center justify-center hover:bg-background-tertiary transition-colors">
-                                    <Icons.Upload className="w-4 h-4 text-foreground-muted" />
-                                </button>
-                            </div>
-
-                            {/* Profile Form */}
-                            <div className="flex-1 space-y-4 w-full">
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <Input label="Full Name" defaultValue="Thai" />
-                                    <Input label="Email" type="email" defaultValue="thai@example.com" disabled />
-                                </div>
-                                <Button variant="primary">Save Changes</Button>
-                            </div>
-                        </div>
-                    </Card.Body>
-                </Card>
-
-                {/* Preferences Section */}
-                <Card className="mb-6">
-                    <Card.Header>Preferences</Card.Header>
-                    <Card.Body className="space-y-6">
-                        {/* Currency */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <p className="font-medium text-foreground">Currency</p>
-                                <p className="text-sm text-foreground-muted">Set your default currency</p>
-                            </div>
-                            <select className="h-10 px-4 bg-background-tertiary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
-                                <option value="USD">USD ($)</option>
-                                <option value="KHR">KHR (៛)</option>
-                                <option value="EUR">EUR (€)</option>
-                                <option value="GBP">GBP (£)</option>
-                            </select>
-                        </div>
-
-                        <div className="border-t border-border" />
-
-                        {/* Language */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <p className="font-medium text-foreground">Language</p>
-                                <p className="text-sm text-foreground-muted">Choose your preferred language</p>
-                            </div>
-                            <select className="h-10 px-4 bg-background-tertiary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
-                                <option value="en">🇺🇸 English</option>
-                                <option value="km">🇰🇭 ភាសាខ្មែរ (Khmer)</option>
-                            </select>
-                        </div>
-
-                        <div className="border-t border-border" />
-
-                        {/* Timezone */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <p className="font-medium text-foreground">Timezone</p>
-                                <p className="text-sm text-foreground-muted">Your local timezone</p>
-                            </div>
-                            <select className="h-10 px-4 bg-background-tertiary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
-                                <option value="Asia/Phnom_Penh">Asia/Phnom_Penh (GMT+7)</option>
-                                <option value="Asia/Bangkok">Asia/Bangkok (GMT+7)</option>
-                                <option value="America/New_York">America/New_York (GMT-5)</option>
-                                <option value="Europe/London">Europe/London (GMT+0)</option>
-                            </select>
-                        </div>
-
-                        <div className="border-t border-border" />
-
-                        {/* Month Start Day */}
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <p className="font-medium text-foreground">Month Start Day</p>
-                                <p className="text-sm text-foreground-muted">When your budget month begins</p>
-                            </div>
-                            <select className="h-10 px-4 bg-background-tertiary border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary-500 w-full sm:w-auto">
-                                <option value="1">1st of the month</option>
-                                <option value="15">15th of the month</option>
-                                <option value="25">25th of the month</option>
-                            </select>
-                        </div>
-                    </Card.Body>
-                </Card>
-
-                {/* Data Management */}
-                <Card className="mb-6">
-                    <Card.Header>Data Management</Card.Header>
-                    <Card.Body className="space-y-4">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-background-tertiary rounded-xl">
-                            <div>
-                                <p className="font-medium text-foreground">Export Data</p>
-                                <p className="text-sm text-foreground-muted">Download all your transactions as CSV</p>
-                            </div>
-                            <Button variant="secondary" icon={<Icons.Download className="w-4 h-4" />}>
-                                Export
-                            </Button>
-                        </div>
-
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-background-tertiary rounded-xl">
-                            <div>
-                                <p className="font-medium text-foreground">Import Data</p>
-                                <p className="text-sm text-foreground-muted">Upload transactions from CSV file</p>
-                            </div>
-                            <Button variant="secondary" icon={<Icons.Upload className="w-4 h-4" />}>
-                                Import
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Card>
-
-                {/* Danger Zone */}
-                <Card className="border-expense/30">
-                    <Card.Header>
-                        <span className="text-expense">Danger Zone</span>
-                    </Card.Header>
-                    <Card.Body>
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 bg-expense/5 rounded-xl">
-                            <div>
-                                <p className="font-medium text-foreground">Delete Account</p>
-                                <p className="text-sm text-foreground-muted">Permanently delete your account and all data</p>
-                            </div>
-                            <Button variant="danger">
-                                Delete Account
-                            </Button>
-                        </div>
-                    </Card.Body>
-                </Card>
+        <div className="min-h-screen bg-[#0a0f0a] flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-4 sticky top-0 bg-[#0a0f0a] z-10">
+                <h1 className="text-xl font-bold text-white">Settings</h1>
             </div>
-        </DashboardLayout>
+
+            <div className="flex-1 px-4 py-2 overflow-y-auto pb-24 max-w-2xl mx-auto w-full">
+                {/* Profile Card */}
+                <div className="flex items-center gap-4 p-4 bg-[#1a2a1a] rounded-2xl mb-6 border border-[#2a3f2a]">
+                    {userImage ? (
+                        <img src={userImage} alt={userName} className="w-14 h-14 rounded-full object-cover" />
+                    ) : (
+                        <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#22c55e] to-[#16a34a] flex items-center justify-center text-white text-xl font-bold">
+                            {initials}
+                        </div>
+                    )}
+
+                    <div>
+                        <h2 className="text-lg font-bold text-white">{userName}</h2>
+                        <p className="text-sm text-gray-400">{userEmail}</p>
+                    </div>
+                </div>
+
+                {/* General Settings */}
+                <div className="space-y-4">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest px-2">General</p>
+
+                    <Link href="/settings/categories" className="flex items-center gap-4 p-4 bg-[#1a2a1a]/50 rounded-xl hover:bg-[#1a2a1a] transition-colors border border-transparent hover:border-[#2a3f2a]">
+                        <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-500">
+                            <Icons.Tag className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-white">Categories & Rules</p>
+                            <p className="text-xs text-gray-500">Manage spending categories</p>
+                        </div>
+                        <Icons.ChevronRight className="w-5 h-5 text-gray-600" />
+                    </Link>
+
+                    <Link href="/accounts" className="flex items-center gap-4 p-4 bg-[#1a2a1a]/50 rounded-xl hover:bg-[#1a2a1a] transition-colors border border-transparent hover:border-[#2a3f2a]">
+                        <div className="w-10 h-10 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-500">
+                            <Icons.Wallet className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-white">Accounts</p>
+                            <p className="text-xs text-gray-500">Manage wallets & banks</p>
+                        </div>
+                        <Icons.ChevronRight className="w-5 h-5 text-gray-600" />
+                    </Link>
+                </div>
+
+                {/* App Settings */}
+                <div className="space-y-4 mt-8">
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-widest px-2">App</p>
+
+                    <button className="w-full flex items-center gap-4 p-4 bg-[#1a2a1a]/50 rounded-xl hover:bg-[#1a2a1a] transition-colors text-left border border-transparent hover:border-[#2a3f2a]">
+                        <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-purple-500">
+                            <Icons.Bell className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-white">Notifications</p>
+                            <p className="text-xs text-gray-500">Reminders & updates</p>
+                        </div>
+                        <Icons.ChevronRight className="w-5 h-5 text-gray-600" />
+                    </button>
+
+                    <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-4 p-4 bg-red-500/10 rounded-xl hover:bg-red-500/20 transition-colors text-left mt-4 border border-red-500/20 hover:border-red-500/40"
+                    >
+                        <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center text-red-500">
+                            <Icons.Logout className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                            <p className="text-sm font-semibold text-red-500">Log Out</p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+
+            <div className="lg:hidden">
+                <BottomNavigation />
+            </div>
+        </div>
     );
 }

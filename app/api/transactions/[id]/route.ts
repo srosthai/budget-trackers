@@ -2,7 +2,7 @@
 // SINGLE TRANSACTION API
 // 
 // GET    /api/transactions/[id]  - Get transaction by ID
-// PUT    /api/transactions/[id]  - Update transaction
+// PATCH  /api/transactions/[id]  - Update transaction
 // DELETE /api/transactions/[id]  - Delete transaction
 // =====================================================
 
@@ -11,16 +11,14 @@ import { auth } from '@/lib/auth';
 import { getRowById, updateRow, deleteRow, SHEETS } from '@/lib/sheets';
 
 interface Transaction {
+    [key: string]: unknown;
     transactionId: string;
     userId: string;
-    type: 'income' | 'expense' | 'transfer';
+    type: 'income' | 'expense';
     date: string;
     amount: number;
     currency: string;
-    accountId: string;
     categoryId: string;
-    fromAccountId: string;
-    toAccountId: string;
     note: string;
     tags: string;
     receiptUrl: string;
@@ -33,10 +31,10 @@ interface RouteParams {
 }
 
 // GET - Get single transaction
-export async function GET(request: NextRequest, { params }: RouteParams) {
+export async function GET(request: NextRequest, props: RouteParams) {
     try {
         const session = await auth();
-        const { id } = await params;
+        const { id } = await props.params;
 
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -62,22 +60,20 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     }
 }
 
-// PUT - Update transaction
-export async function PUT(request: NextRequest, { params }: RouteParams) {
+// PATCH - Update transaction
+export async function PATCH(request: NextRequest, props: RouteParams) {
     try {
         const session = await auth();
-        const { id } = await params;
+        const { id } = await props.params;
 
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const transaction = await getRowById<Transaction>(SHEETS.TRANSACTIONS, 'transactionId', id);
-
         if (!transaction) {
             return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
         }
-
         if (transaction.userId !== session.user.id) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
@@ -85,19 +81,19 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         const body = await request.json();
         const updates: Partial<Transaction> = {};
 
+        // Allow updating fields
         if (body.type !== undefined) updates.type = body.type;
         if (body.date !== undefined) updates.date = body.date;
         if (body.amount !== undefined) updates.amount = Number(body.amount);
         if (body.currency !== undefined) updates.currency = body.currency;
-        if (body.accountId !== undefined) updates.accountId = body.accountId;
         if (body.categoryId !== undefined) updates.categoryId = body.categoryId;
-        if (body.fromAccountId !== undefined) updates.fromAccountId = body.fromAccountId;
-        if (body.toAccountId !== undefined) updates.toAccountId = body.toAccountId;
         if (body.note !== undefined) updates.note = body.note;
         if (body.tags !== undefined) {
             updates.tags = Array.isArray(body.tags) ? body.tags.join(',') : body.tags;
         }
         if (body.receiptUrl !== undefined) updates.receiptUrl = body.receiptUrl;
+
+        updates.updatedAt = new Date().toISOString();
 
         const updatedTransaction = await updateRow<Transaction>(
             SHEETS.TRANSACTIONS,
@@ -105,6 +101,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             id,
             updates
         );
+
+        if (!updatedTransaction) {
+            return NextResponse.json({ error: 'Failed to update row' }, { status: 500 });
+        }
 
         return NextResponse.json({ success: true, transaction: updatedTransaction });
     } catch (error) {
@@ -117,10 +117,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 // DELETE - Delete transaction
-export async function DELETE(request: NextRequest, { params }: RouteParams) {
+export async function DELETE(request: NextRequest, props: RouteParams) {
     try {
         const session = await auth();
-        const { id } = await params;
+        const { id } = await props.params;
 
         if (!session?.user?.id) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -128,12 +128,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
         const transaction = await getRowById<Transaction>(SHEETS.TRANSACTIONS, 'transactionId', id);
 
-        if (!transaction) {
-            return NextResponse.json({ error: 'Transaction not found' }, { status: 404 });
-        }
-
-        if (transaction.userId !== session.user.id) {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        if (!transaction || transaction.userId !== session.user.id) {
+            return NextResponse.json({ error: 'not found or forbidden' }, { status: 404 });
         }
 
         await deleteRow(SHEETS.TRANSACTIONS, 'transactionId', id);
