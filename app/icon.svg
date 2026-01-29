@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#22c55e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="grad2" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Circle background -->
+  <circle cx="16" cy="16" r="15" fill="url(#grad1)" opacity="0.15"/>
+  <circle cx="16" cy="16" r="15" fill="none" stroke="url(#grad1)" stroke-width="2"/>
+  <!-- Dollar sign -->
+  <text x="16" y="22" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="url(#grad2)" text-anchor="middle">$</text>
+  <!-- Up arrow -->
+  <path d="M24 8 L28 12 L25.5 12 L25.5 16 L22.5 16 L22.5 12 L20 12 Z" fill="#22c55e"/>
+</svg>

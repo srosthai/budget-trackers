@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" width="180" height="180">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e3a5f;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0f172a;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#22c55e;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="180" height="180" rx="40" fill="url(#bg)"/>
+  <!-- Circle -->
+  <circle cx="90" cy="95" r="55" fill="none" stroke="url(#accent)" stroke-width="6" opacity="0.3"/>
+  <circle cx="90" cy="95" r="55" fill="none" stroke="url(#accent)" stroke-width="6" stroke-dasharray="200 150" stroke-linecap="round"/>
+  <!-- Dollar sign -->
+  <text x="90" y="115" font-family="Arial, sans-serif" font-size="60" font-weight="bold" fill="url(#accent)" text-anchor="middle">$</text>
+  <!-- Up arrow -->
+  <path d="M130 50 L145 65 L138 65 L138 85 L122 85 L122 65 L115 65 Z" fill="#22c55e"/>
+  <!-- Small chart bars -->
+  <rect x="35" y="110" width="12" height="30" rx="3" fill="#3b82f6" opacity="0.7"/>
+  <rect x="52" y="95" width="12" height="45" rx="3" fill="#22c55e" opacity="0.8"/>
+</svg>
