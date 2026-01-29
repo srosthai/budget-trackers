@@ -205,18 +205,6 @@ export function TransactionFilterBar({
                     options={categories.map(c => ({ value: c.id, label: c.name }))}
                 />
 
-                {/* Date Filter - Native fallback with style match */}
-                <div className="relative shrink-0">
-                    <input
-                        type="date"
-                        value={filters.startDate || ''}
-                        onChange={(e) => onFilterChange('startDate', e.target.value || undefined)}
-                        className={`appearance-none pl-4 pr-2 py-2 rounded-full border text-sm focus:outline-none transition-colors h-[38px] ${filters.startDate
-                            ? 'bg-[#22c55e]/10 border-[#22c55e] text-[#22c55e]'
-                            : 'bg-[#1a2a1a] border-[#2a3f2a] text-gray-300 hover:border-gray-500'
-                            } [color-scheme:dark]`}
-                    />
-                </div>
             </div>
         </div>
     );

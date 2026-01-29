@@ -89,6 +89,7 @@ const translations: Record<Language, Record<string, string>> = {
         'profile.categoriesDesc': 'Manage spending categories',
         'profile.account': 'Account',
         'profile.logout': 'Log Out',
+        'profile.loggingOut': 'Logging out...',
 
         // Common
         'common.save': 'Save',
@@ -225,6 +226,7 @@ const translations: Record<Language, Record<string, string>> = {
         'profile.categoriesDesc': 'គ្រប់គ្រងប្រភេទចំណាយ',
         'profile.account': 'គណនី',
         'profile.logout': 'ចាកចេញ',
+        'profile.loggingOut': 'កំពុងចាកចេញ...',
 
         // Common
         'common.save': 'រក្សាទុក',

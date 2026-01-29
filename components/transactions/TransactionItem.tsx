@@ -119,7 +119,7 @@ export function TransactionItem({ note, categoryName, amount, type, onEdit, onDe
             {/* Amount & Menu */}
             <div className="flex items-center gap-2">
                 <div className="text-right shrink-0">
-                    <p className={`text-sm font-semibold ${isIncome ? 'text-[#22c55e]' : 'text-white'}`}>
+                    <p className={`text-sm font-semibold ${isIncome ? 'text-[#22c55e]' : 'text-red-500'}`}>
                         {isIncome ? '+' : '-'}{formattedAmount}
                     </p>
                 </div>

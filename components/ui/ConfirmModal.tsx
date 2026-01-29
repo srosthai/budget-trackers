@@ -35,7 +35,7 @@ export function ConfirmModal({
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-            <div className="w-full max-w-sm bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-6 shadow-2xl animate-scale-up">
+            <div className="w-full max-w-sm bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-5 sm:p-6 shadow-2xl animate-scale-up">
 
                 {/* Icon & Title */}
                 <div className="flex items-start gap-4 mb-4">
@@ -62,14 +62,14 @@ export function ConfirmModal({
                     <button
                         onClick={onClose}
                         disabled={isLoading}
-                        className="flex-1 h-11 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white hover:bg-white/5 font-medium transition-colors disabled:opacity-50"
+                        className="flex-1 h-12 sm:h-11 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all disabled:opacity-50 active:scale-[0.98]"
                     >
                         {cancelText}
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={isLoading}
-                        className={`flex-1 h-11 rounded-xl font-bold text-[#0a0f0a] transition-all disabled:opacity-50 flex items-center justify-center gap-2 ${variant === 'danger'
+                        className={`flex-1 h-12 sm:h-11 rounded-xl font-bold text-[#0a0f0a] transition-all disabled:opacity-50 flex items-center justify-center gap-2 active:scale-[0.98] ${variant === 'danger'
                                 ? 'bg-red-500 hover:bg-red-600 shadow-[0_0_20px_-5px_rgba(239,68,68,0.3)]'
                                 : 'bg-[#22c55e] hover:bg-[#16a34a] shadow-[0_0_20px_-5px_rgba(34,197,94,0.3)]'
                             }`}

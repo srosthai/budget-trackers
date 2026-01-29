@@ -66,7 +66,7 @@ export function AccountModal({ isOpen, onClose, onSave, initialData }: AccountMo
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-6 shadow-2xl animate-scale-up">
+            <div className="w-full max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-5 sm:p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto noscroll">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-white">
                         {initialData ? 'Edit Account' : 'New Account'}
@@ -76,7 +76,7 @@ export function AccountModal({ isOpen, onClose, onSave, initialData }: AccountMo
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     {/* Type Grid */}
                     <div className="grid grid-cols-4 gap-2 mb-4">
                         {ACCOUNT_TYPES.map(t => {
@@ -140,18 +140,18 @@ export function AccountModal({ isOpen, onClose, onSave, initialData }: AccountMo
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 mt-6">
+                    <div className="flex gap-3 pt-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 h-12 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white font-medium"
+                            className="flex-1 h-14 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white font-semibold text-base active:scale-[0.98] transition-transform"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || !name.trim()}
-                            className="flex-1 h-12 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 h-14 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold text-base hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
                         >
                             {isSubmitting ? 'Saving...' : 'Save'}
                         </button>

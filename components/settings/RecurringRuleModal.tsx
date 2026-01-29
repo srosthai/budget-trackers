@@ -51,7 +51,7 @@ export function RecurringRuleModal({ isOpen, onClose, onSave }: RecurringRuleMod
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto noscroll">
+            <div className="w-full max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-5 sm:p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto noscroll">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-xl font-bold text-white">New Recurring Transaction</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-white">
@@ -59,7 +59,7 @@ export function RecurringRuleModal({ isOpen, onClose, onSave }: RecurringRuleMod
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-5">
                     {/* Type */}
                     <div className="flex p-1 bg-[#1a2a1a] rounded-xl mb-4">
                         {['expense', 'income'].map((t) => (
@@ -134,7 +134,7 @@ export function RecurringRuleModal({ isOpen, onClose, onSave }: RecurringRuleMod
                     <button
                         type="submit"
                         disabled={isSubmitting || !amount || !categoryId}
-                        className="w-full h-12 mt-4 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold hover:bg-[#16a34a] disabled:opacity-50"
+                        className="w-full h-14 mt-2 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold text-base hover:bg-[#16a34a] disabled:opacity-50 active:scale-[0.98] transition-transform"
                     >
                         {isSubmitting ? 'Saving...' : 'Save Rule'}
                     </button>

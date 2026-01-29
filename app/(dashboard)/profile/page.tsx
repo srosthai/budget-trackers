@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { Icons } from '@/components/ui';
@@ -10,8 +11,10 @@ export default function ProfilePage() {
     const { data: session, status } = useSession();
     const { theme, setTheme } = useTheme();
     const { language, setLanguage, t } = useLanguage();
+    const [isLoggingOut, setIsLoggingOut] = useState(false);
 
     const handleLogout = async () => {
+        setIsLoggingOut(true);
         await signOut({ callbackUrl: '/login' });
     };
 
@@ -175,13 +178,20 @@ export default function ProfilePage() {
 
                     <button
                         onClick={handleLogout}
-                        className="w-full flex items-center gap-4 p-4 bg-red-500/10 rounded-2xl hover:bg-red-500/20 transition-colors border border-red-500/20 hover:border-red-500/40"
+                        disabled={isLoggingOut}
+                        className="w-full flex items-center gap-4 p-4 bg-red-500/10 rounded-2xl hover:bg-red-500/20 transition-colors border border-red-500/20 hover:border-red-500/40 disabled:opacity-70 disabled:cursor-not-allowed"
                     >
                         <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center">
-                            <Icons.Logout className="w-5 h-5 text-red-500" />
+                            {isLoggingOut ? (
+                                <div className="w-5 h-5 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+                            ) : (
+                                <Icons.Logout className="w-5 h-5 text-red-500" />
+                            )}
                         </div>
                         <div className="flex-1 text-left">
-                            <p className="text-sm font-semibold text-red-500">{t('profile.logout')}</p>
+                            <p className="text-sm font-semibold text-red-500">
+                                {isLoggingOut ? t('profile.loggingOut') : t('profile.logout')}
+                            </p>
                         </div>
                     </button>
                 </div>
