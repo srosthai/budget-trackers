@@ -32,6 +32,7 @@ interface Filters {
     startDate?: string;
     endDate?: string;
     search?: string;
+    period?: string; // 'today' | 'week' | 'month' | 'year' | 'custom'
 }
 
 interface UseTransactionsReturn {

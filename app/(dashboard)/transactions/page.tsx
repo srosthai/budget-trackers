@@ -23,7 +23,10 @@ function TransactionsContent() {
         refresh
     } = useTransactions();
 
-    const { categories } = useCategories();
+    const { categories, expenseCategories, incomeCategories } = useCategories();
+
+    // Combine expense and income categories with their subcategories for the filter
+    const categoriesWithSubs = [...expenseCategories, ...incomeCategories];
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTx, setEditingTx] = useState<Transaction | null>(null);
@@ -84,7 +87,13 @@ function TransactionsContent() {
                 onSearchChange={handleSearch}
                 filters={filters}
                 onFilterChange={(key, val) => setFilters(prev => ({ ...prev, [key]: val }))}
-                categories={categories.map(c => ({ id: c.categoryId, name: c.name }))}
+                onDateRangeChange={(startDate, endDate) => setFilters(prev => ({
+                    ...prev,
+                    startDate,
+                    endDate,
+                    period: prev.period === 'custom' ? 'custom' : prev.period
+                }))}
+                categories={categoriesWithSubs}
             />
 
             <div className="flex-1 px-2 pb-24 overflow-y-auto">

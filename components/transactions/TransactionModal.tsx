@@ -23,7 +23,8 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
     const [type, setType] = useState<'expense' | 'income'>('expense');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-    const [categoryId, setCategoryId] = useState('');
+    const [parentCategoryId, setParentCategoryId] = useState('');
+    const [subCategoryId, setSubCategoryId] = useState('');
     const [note, setNote] = useState('');
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,23 +32,63 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
     // Data Hooks
     const { incomeCategories, expenseCategories } = useCategories();
 
+    const activeCategories = type === 'income' ? incomeCategories : expenseCategories;
+
+    // Find selected parent and check for subcategories
+    const selectedParent = activeCategories.find(c => c.categoryId === parentCategoryId);
+    const hasSubcategories = selectedParent?.subcategories && selectedParent.subcategories.length > 0;
+
+    // The actual categoryId to save (prefer subcategory if selected)
+    const categoryId = subCategoryId || parentCategoryId;
+
+    // Reset form when modal opens/closes or when editing different transaction
     useEffect(() => {
+        if (!isOpen) return;
+
         if (initialData) {
             // @ts-ignore - Ignore transfer type if it exists in old data
-            setType(initialData.type === 'transfer' ? 'expense' : initialData.type);
+            const txType = initialData.type === 'transfer' ? 'expense' : initialData.type;
+            setType(txType);
             setAmount(initialData.amount.toString());
             setDate(initialData.date.split('T')[0]);
-            setCategoryId(initialData.categoryId || '');
             setNote(initialData.note || '');
+            // Category will be set in separate effect when categories load
         } else {
-            // Default state
+            // Default state for new transaction
             setType(defaultType);
             setAmount('');
             setDate(new Date().toISOString().split('T')[0]);
-            setCategoryId('');
+            setParentCategoryId('');
+            setSubCategoryId('');
             setNote('');
         }
     }, [initialData, isOpen, defaultType]);
+
+    // Set category when editing and categories are loaded
+    useEffect(() => {
+        if (!isOpen || !initialData?.categoryId) return;
+        if (incomeCategories.length === 0 && expenseCategories.length === 0) return;
+
+        const cats = initialData.type === 'income' ? incomeCategories : expenseCategories;
+        const catId = initialData.categoryId;
+
+        // Check if it's a parent category
+        const isParent = cats.find(c => c.categoryId === catId);
+        if (isParent) {
+            setParentCategoryId(catId);
+            setSubCategoryId('');
+        } else {
+            // Find parent of this subcategory
+            for (const parent of cats) {
+                const sub = parent.subcategories?.find(s => s.categoryId === catId);
+                if (sub) {
+                    setParentCategoryId(parent.categoryId);
+                    setSubCategoryId(catId);
+                    break;
+                }
+            }
+        }
+    }, [initialData, isOpen, incomeCategories, expenseCategories]);
 
     if (!isOpen) return null;
 
@@ -69,52 +110,45 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
         if (success) onClose();
     };
 
-    const activeCategories = type === 'income' ? incomeCategories : expenseCategories;
+    // Build parent category options
+    const parentOptions = activeCategories.map(c => ({
+        value: c.categoryId,
+        label: c.name,
+        color: c.color
+    }));
 
-    // Build flat options with parent/child hierarchy
-    const categoryOptions: { value: string; label: string; color?: string; isChild?: boolean }[] = [];
-    activeCategories.forEach(parent => {
-        // Add parent category
-        categoryOptions.push({
-            value: parent.categoryId,
-            label: parent.name,
-            color: parent.color
-        });
-        // Add sub-categories with indent
-        if (parent.subcategories && parent.subcategories.length > 0) {
-            parent.subcategories.forEach(sub => {
-                categoryOptions.push({
-                    value: sub.categoryId,
-                    label: `  └ ${sub.name}`,
-                    color: sub.color,
-                    isChild: true
-                });
-            });
-        }
-    });
+    // Build subcategory options if parent is selected and has subcategories
+    const subCategoryOptions = hasSubcategories
+        ? selectedParent!.subcategories!.map(s => ({
+            value: s.categoryId,
+            label: s.name,
+            color: s.color
+        }))
+        : [];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-            <div className="w-full max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-2xl p-5 sm:p-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto noscroll">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-bold text-white">
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm">
+            <div className="w-full sm:max-w-md bg-[#0a0f0a] border border-[#1a2f1a] rounded-t-2xl sm:rounded-2xl p-4 pb-24 sm:p-6 sm:pb-6 shadow-2xl animate-scale-up max-h-[90vh] overflow-y-auto overscroll-contain">
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl font-bold text-white">
                         {initialData ? 'Edit Transaction' : 'New Transaction'}
                     </h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-white">
-                        <Icons.X className="w-6 h-6" />
+                    <button onClick={onClose} className="text-gray-400 hover:text-white p-1">
+                        <Icons.X className="w-5 h-5 sm:w-6 sm:h-6" />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-5">
+                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                     {/* Type Toggle */}
-                    <div className="flex p-1 bg-[#1a2a1a] rounded-xl mb-4">
+                    <div className="flex p-1 bg-[#1a2a1a] rounded-xl mb-3 sm:mb-4">
                         {['expense', 'income'].map((t) => (
                             <button
                                 key={t}
                                 type="button"
                                 onClick={() => {
                                     setType(t as any);
-                                    setCategoryId(''); // Reset category on type change
+                                    setParentCategoryId('');
+                                    setSubCategoryId('');
                                 }}
                                 className={`flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-colors ${type === t
                                     ? (t === 'expense' ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500')
@@ -136,20 +170,35 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
                                 value={amount}
                                 onChange={(e) => setAmount(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full h-12 pl-8 pr-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white text-lg font-bold focus:border-[#22c55e] focus:outline-none"
+                                className="w-full h-11 sm:h-12 pl-8 pr-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white text-lg font-bold focus:border-[#22c55e] focus:outline-none"
                                 autoFocus
                             />
                         </div>
                     </div>
 
-                    {/* Category Select */}
+                    {/* Parent Category Select */}
                     <div>
                         <Select
                             label="Category"
-                            value={categoryId}
-                            onChange={setCategoryId}
-                            options={categoryOptions}
+                            value={parentCategoryId}
+                            onChange={(val) => {
+                                setParentCategoryId(val);
+                                setSubCategoryId(''); // Reset subcategory when parent changes
+                            }}
+                            options={parentOptions}
                             placeholder="Select Category"
+                        />
+                    </div>
+
+                    {/* Sub-category Select - Always visible, disabled when no subcategories */}
+                    <div>
+                        <Select
+                            label="Sub-category"
+                            value={subCategoryId}
+                            onChange={setSubCategoryId}
+                            options={subCategoryOptions}
+                            placeholder={hasSubcategories ? "Select Sub-category" : "None"}
+                            disabled={!hasSubcategories}
                         />
                     </div>
 
@@ -160,7 +209,7 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
                             type="date"
                             value={date}
                             onChange={(e) => setDate(e.target.value)}
-                            className="w-full h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none [color-scheme:dark]"
+                            className="w-full h-11 sm:h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none [color-scheme:dark]"
                         />
                     </div>
 
@@ -172,25 +221,25 @@ export function TransactionModal({ isOpen, onClose, onSave, initialData, default
                             value={note}
                             onChange={(e) => setNote(e.target.value)}
                             placeholder="Add details..."
-                            className="w-full h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none"
+                            className="w-full h-11 sm:h-12 px-4 bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl text-white focus:border-[#22c55e] focus:outline-none"
                         />
                     </div>
 
                     {/* Actions */}
-                    <div className="flex gap-3 pt-2">
+                    <div className="flex gap-3 pt-3 sm:pt-2">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 h-14 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white font-semibold text-base active:scale-[0.98] transition-transform"
+                            className="flex-1 h-12 sm:h-14 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white font-semibold text-base active:scale-[0.98] transition-transform"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isSubmitting || !amount}
-                            className="flex-1 h-14 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold text-base hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
+                            className="flex-1 h-12 sm:h-14 rounded-xl bg-[#22c55e] text-[#0a0f0a] font-bold text-base hover:bg-[#16a34a] disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
                         >
-                            {isSubmitting ? 'Saving...' : 'Save Transaction'}
+                            {isSubmitting ? 'Saving...' : 'Save'}
                         </button>
                     </div>
                 </form>

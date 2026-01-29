@@ -23,9 +23,10 @@ interface SelectProps {
     options: Option[];
     placeholder?: string;
     className?: string;
+    disabled?: boolean;
 }
 
-export function Select({ label, value, onChange, options, placeholder = 'Select...', className = '' }: SelectProps) {
+export function Select({ label, value, onChange, options, placeholder = 'Select...', className = '', disabled = false }: SelectProps) {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -44,13 +45,19 @@ export function Select({ label, value, onChange, options, placeholder = 'Select.
 
     return (
         <div className={`relative ${className}`} ref={dropdownRef}>
-            {label && <label className="block text-sm font-medium text-gray-400 mb-1">{label}</label>}
+            {label && <label className={`block text-sm font-medium mb-1 ${disabled ? 'text-gray-600' : 'text-gray-400'}`}>{label}</label>}
 
             <button
                 type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className={`w-full h-12 px-4 bg-[#1a2a1a] border rounded-xl flex items-center justify-between transition-colors ${isOpen ? 'border-[#22c55e]' : 'border-[#2a3f2a]'
-                    }`}
+                onClick={() => !disabled && setIsOpen(!isOpen)}
+                disabled={disabled}
+                className={`w-full h-11 sm:h-12 px-4 bg-[#1a2a1a] border rounded-xl flex items-center justify-between transition-colors ${
+                    disabled
+                        ? 'border-[#1a2f1a] opacity-50 cursor-not-allowed'
+                        : isOpen
+                            ? 'border-[#22c55e]'
+                            : 'border-[#2a3f2a]'
+                }`}
             >
                 <span className={selectedOption ? 'text-white' : 'text-gray-500'}>
                     {selectedOption ? selectedOption.label : placeholder}
@@ -59,8 +66,8 @@ export function Select({ label, value, onChange, options, placeholder = 'Select.
             </button>
 
             {/* Dropdown Menu */}
-            {isOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 max-h-60 overflow-y-auto bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl shadow-xl scrollbar-thin scrollbar-thumb-gray-700">
+            {isOpen && !disabled && (
+                <div className="absolute top-full left-0 right-0 mt-2 z-50 max-h-48 sm:max-h-60 overflow-y-auto overscroll-contain bg-[#1a2a1a] border border-[#2a3f2a] rounded-xl shadow-xl scrollbar-thin scrollbar-thumb-gray-700">
                     {options.length > 0 ? options.map((opt) => {
                         const Icon = opt.icon ? Icons[opt.icon] : null;
                         return (
@@ -71,7 +78,7 @@ export function Select({ label, value, onChange, options, placeholder = 'Select.
                                     onChange(opt.value);
                                     setIsOpen(false);
                                 }}
-                                className={`w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[#22c55e]/10 transition-colors ${value === opt.value ? 'text-[#22c55e] bg-[#22c55e]/5' : 'text-gray-300'
+                                className={`w-full flex items-center justify-between px-4 py-2.5 sm:py-3 text-left hover:bg-[#22c55e]/10 transition-colors ${value === opt.value ? 'text-[#22c55e] bg-[#22c55e]/5' : 'text-gray-300'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
