@@ -27,6 +27,7 @@ interface SheetUser {
     language: string;
     createdAt: string;
     updatedAt: string;
+    [key: string]: unknown;
 }
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
@@ -151,7 +152,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
     pages: {
         signIn: '/login',
-        signUp: '/register',
         error: '/login',
     },
 

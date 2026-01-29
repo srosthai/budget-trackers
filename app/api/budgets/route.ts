@@ -18,6 +18,7 @@ interface Budget {
     limitAmount: number;
     createdAt: string;
     updatedAt: string;
+    [key: string]: unknown;
 }
 
 // GET - List all budgets for current user

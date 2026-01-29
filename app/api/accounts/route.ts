@@ -21,6 +21,7 @@ interface Account {
     color: string;
     createdAt: string;
     updatedAt: string;
+    [key: string]: unknown;
 }
 
 // GET - List all accounts for current user

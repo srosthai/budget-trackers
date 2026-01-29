@@ -250,7 +250,7 @@ export async function updateRow<T extends Record<string, unknown>>(
         },
     });
 
-    return updatedData as T;
+    return updatedData as unknown as T;
 }
 
 /**
@@ -345,7 +345,7 @@ export async function initializeSheet(sheetName: SheetName): Promise<void> {
 
     if (!response.data.values || response.data.values.length === 0) {
         // Add headers
-        const columns = SHEET_COLUMNS[sheetName];
+        const columns = [...SHEET_COLUMNS[sheetName]];
         await sheets.spreadsheets.values.update({
             spreadsheetId,
             range: `${sheetName}!A1`,
@@ -393,7 +393,7 @@ export async function updateSheetHeaders(sheetName: SheetName): Promise<void> {
 
     if (!spreadsheetId) return;
 
-    const columns = SHEET_COLUMNS[sheetName];
+    const columns = [...SHEET_COLUMNS[sheetName]];
     await sheets.spreadsheets.values.update({
         spreadsheetId,
         range: `${sheetName}!A1`,

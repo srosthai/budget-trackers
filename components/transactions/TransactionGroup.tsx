@@ -10,11 +10,10 @@ import { TransactionItem } from './TransactionItem';
 
 interface Transaction {
     transactionId: string;
-    type: 'income' | 'expense' | 'transfer';
+    type: 'income' | 'expense';
     date: string;
     amount: number;
     categoryId: string;
-    accountId: string;
     note: string;
 }
 
@@ -34,8 +33,7 @@ export function TransactionGroup({ title, transactions }: TransactionGroupProps)
                     <TransactionItem
                         key={tx.transactionId}
                         note={tx.note}
-                        accountName={tx.accountId || 'Cash'} // To be enriched
-                        categoryName={tx.categoryId || 'Uncategorized'} // To be enriched
+                        categoryName={tx.categoryId || 'Uncategorized'}
                         amount={tx.amount}
                         type={tx.type}
                     />

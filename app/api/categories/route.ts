@@ -20,6 +20,7 @@ interface Category {
     parentCategoryId: string;
     createdAt: string;
     updatedAt: string;
+    [key: string]: unknown;
 }
 
 // GET - List all categories for current user

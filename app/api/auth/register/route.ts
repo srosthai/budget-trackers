@@ -28,6 +28,7 @@ interface SheetUser {
     language: string;
     createdAt: string;
     updatedAt: string;
+    [key: string]: unknown;
 }
 
 export async function POST(request: NextRequest) {

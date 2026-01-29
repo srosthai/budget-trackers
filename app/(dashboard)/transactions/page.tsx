@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useTransactions, useCategories, Transaction } from '@/hooks';
 import { TransactionFilterBar, TransactionItem, TransactionModal, TransactionsSkeleton } from '@/components/transactions';
@@ -8,7 +8,7 @@ import { Icons, ConfirmModal } from '@/components/ui';
 import { BottomNavigation } from '@/components/dashboard';
 import { useLanguage } from '@/components/providers';
 
-export default function TransactionsPage() {
+function TransactionsContent() {
     const { t } = useLanguage();
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -161,5 +161,13 @@ export default function TransactionsPage() {
                 <BottomNavigation />
             </div>
         </div>
+    );
+}
+
+export default function TransactionsPage() {
+    return (
+        <Suspense fallback={<TransactionsSkeleton />}>
+            <TransactionsContent />
+        </Suspense>
     );
 }
