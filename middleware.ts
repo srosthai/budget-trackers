@@ -15,9 +15,7 @@ export const config = {
         // Protected routes
         '/dashboard/:path*',
         '/transactions/:path*',
-        '/accounts/:path*',
         '/categories/:path*',
-        '/budgets/:path*',
         '/settings/:path*',
         // Auth routes
         '/login',
@@ -33,7 +31,7 @@ export function middleware(request: NextRequest) {
         || request.cookies.get('__Secure-authjs.session-token')?.value;
 
     // Protected routes
-    const protectedPaths = ['/dashboard', '/transactions', '/accounts', '/categories', '/budgets', '/settings'];
+    const protectedPaths = ['/dashboard', '/transactions', '/categories', '/settings'];
     const isProtectedRoute = protectedPaths.some((path) => pathname.startsWith(path));
 
     // Auth routes (login, register)

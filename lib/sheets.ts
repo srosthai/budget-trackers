@@ -7,14 +7,11 @@
 
 import { google, sheets_v4 } from 'googleapis';
 
-// Sheet names matching BUILD_PLAN.md
+// Sheet names matching CLAUDE.md
 export const SHEETS = {
     USERS: 'users',
-    ACCOUNTS: 'accounts',
     CATEGORIES: 'categories',
     TRANSACTIONS: 'transactions',
-    RECURRING_RULES: 'recurring_rules',
-    BUDGETS: 'budgets',
 } as const;
 
 export type SheetName = (typeof SHEETS)[keyof typeof SHEETS];
@@ -26,28 +23,14 @@ export const SHEET_COLUMNS = {
         'passwordHash', 'currency', 'timezone', 'language',
         'createdAt', 'updatedAt'
     ],
-    accounts: [
-        'accountId', 'userId', 'name', 'type', 'currency',
-        'startingBalance', 'note', 'color', 'createdAt', 'updatedAt'
-    ],
     categories: [
         'categoryId', 'userId', 'name', 'type',
         'parentCategoryId', 'createdAt', 'updatedAt'
     ],
     transactions: [
         'transactionId', 'userId', 'type', 'date', 'amount',
-        'currency', 'accountId', 'categoryId', 'fromAccountId',
-        'toAccountId', 'note', 'tags', 'receiptUrl',
+        'currency', 'categoryId', 'note', 'tags', 'receiptUrl',
         'createdAt', 'updatedAt'
-    ],
-    recurring_rules: [
-        'ruleId', 'userId', 'type', 'amount', 'categoryId',
-        'accountId', 'frequency', 'nextRunDate', 'note',
-        'active', 'createdAt', 'updatedAt'
-    ],
-    budgets: [
-        'budgetId', 'userId', 'month', 'categoryId',
-        'limitAmount', 'createdAt', 'updatedAt'
     ],
 } as const;
 

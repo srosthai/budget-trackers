@@ -16,15 +16,6 @@ interface DashboardStats {
     totalBalance: { amount: number };
 }
 
-interface Account {
-    accountId: string;
-    name: string;
-    type: string;
-    currency: string;
-    currentBalance: number;
-    color: string;
-}
-
 interface Transaction {
     transactionId: string;
     type: 'income' | 'expense';
@@ -38,7 +29,6 @@ interface Transaction {
 interface UseDashboardReturn {
     // Data
     stats: DashboardStats | null;
-    accounts: Account[];
     recentTransactions: Transaction[];
     weeklySpending: number[];
     dailySpending: number[];
@@ -61,7 +51,6 @@ export function useDashboard(): UseDashboardReturn {
         return new Date().toISOString().slice(0, 7); // YYYY-MM
     });
     const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [accounts, setAccounts] = useState<Account[]>([]);
     const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
     const [weeklySpending, setWeeklySpending] = useState<number[]>([0, 0, 0, 0]);
     const [dailySpending, setDailySpending] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
@@ -84,7 +73,6 @@ export function useDashboard(): UseDashboardReturn {
             const data = await response.json();
 
             setStats(data.stats);
-            setAccounts(data.accounts || []);
             setRecentTransactions(data.recentTransactions || []);
             setWeeklySpending(data.weeklySpending || [0, 0, 0, 0]);
             setDailySpending(data.dailySpending || [0, 0, 0, 0, 0, 0, 0]);
@@ -117,7 +105,6 @@ export function useDashboard(): UseDashboardReturn {
 
     return {
         stats,
-        accounts,
         recentTransactions,
         weeklySpending,
         dailySpending,

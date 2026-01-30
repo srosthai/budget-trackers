@@ -30,7 +30,6 @@ export default function DashboardPage() {
     const { t } = useLanguage();
     const {
         stats,
-        accounts,
         recentTransactions,
         weeklySpending,
         dailySpending,
@@ -109,7 +108,6 @@ export default function DashboardPage() {
             <div className="hidden lg:block">
                 <DesktopDashboard
                     stats={stats}
-                    accounts={[]}
                     recentTransactions={recentTransactions}
                     weeklySpending={weeklySpending}
                     dailySpending={dailySpending}
@@ -129,7 +127,6 @@ export default function DashboardPage() {
 
 interface DesktopDashboardProps {
     stats: ReturnType<typeof useDashboard>['stats'];
-    accounts: ReturnType<typeof useDashboard>['accounts'];
     recentTransactions: ReturnType<typeof useDashboard>['recentTransactions'];
     weeklySpending: number[];
     dailySpending: number[];
@@ -141,7 +138,6 @@ interface DesktopDashboardProps {
 
 function DesktopDashboard({
     stats,
-    accounts,
     recentTransactions,
     weeklySpending,
     dailySpending,
@@ -265,71 +261,6 @@ function StatCard({ label, amount, change, type }: StatCardProps) {
                     </p>
                 )}
             </div>
-        </div>
-    );
-}
-
-// =====================================================
-// ACCOUNTS CARD
-// =====================================================
-
-interface AccountsCardProps {
-    accounts: Array<{
-        accountId: string;
-        name: string;
-        type: string;
-        currency: string;
-        currentBalance: number;
-        color: string;
-    }>;
-}
-
-function AccountsCard({ accounts }: AccountsCardProps) {
-    return (
-        <div className="rounded-xl bg-[#0f1610] p-5 border border-[#1a2f1a]">
-            <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-white">Accounts</h3>
-                <button className="text-sm font-medium text-[#22c55e] hover:text-[#16a34a] transition-colors flex items-center gap-1">
-                    <Icons.Plus className="w-4 h-4" />
-                    Add
-                </button>
-            </div>
-
-            {accounts.length === 0 ? (
-                <div className="py-6 text-center">
-                    <Icons.Wallet className="w-10 h-10 mx-auto text-gray-600 mb-2" />
-                    <p className="text-gray-500 text-sm">No accounts yet</p>
-                </div>
-            ) : (
-                <div className="space-y-3">
-                    {accounts.map((account) => {
-                        const formattedBalance = new Intl.NumberFormat('en-US', {
-                            style: 'currency',
-                            currency: account.currency || 'USD',
-                            minimumFractionDigits: 2,
-                        }).format(account.currentBalance);
-
-                        return (
-                            <div
-                                key={account.accountId}
-                                className="flex items-center gap-3 p-3 rounded-xl bg-[#0a1209] hover:bg-[#0d1610] transition-colors cursor-pointer"
-                            >
-                                <div
-                                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                                    style={{ backgroundColor: account.color || '#22c55e' }}
-                                >
-                                    {account.name.charAt(0).toUpperCase()}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">{account.name}</p>
-                                    <p className="text-xs text-gray-500 capitalize">{account.type}</p>
-                                </div>
-                                <p className="text-sm font-semibold text-white">{formattedBalance}</p>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
         </div>
     );
 }

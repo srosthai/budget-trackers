@@ -28,19 +28,10 @@ export const TIMEZONES = [
     { value: 'Europe/Paris', label: 'Europe/Paris (GMT+1)' },
 ] as const;
 
-// Account types
-export const ACCOUNT_TYPES = [
-    { value: 'cash', label: 'Cash', icon: 'BankNotes' },
-    { value: 'bank', label: 'Bank Account', icon: 'CreditCard' },
-    { value: 'ewallet', label: 'E-Wallet', icon: 'Wallet' },
-    { value: 'credit', label: 'Credit Card', icon: 'CreditCard' },
-] as const;
-
 // Transaction types
 export const TRANSACTION_TYPES = [
     { value: 'income', label: 'Income', color: 'income' },
     { value: 'expense', label: 'Expense', color: 'expense' },
-    { value: 'transfer', label: 'Transfer', color: 'transfer' },
 ] as const;
 
 // Date presets for filters
@@ -55,12 +46,6 @@ export const DATE_PRESETS = [
     { value: 'custom', label: 'Custom range' },
 ] as const;
 
-// Budget alert thresholds
-export const BUDGET_THRESHOLDS = {
-    WARNING: 80, // 80% - yellow warning
-    DANGER: 100, // 100% - over budget
-} as const;
-
 // Pagination defaults
 export const PAGINATION = {
     DEFAULT_PAGE_SIZE: 10,
@@ -70,11 +55,9 @@ export const PAGINATION = {
 // API endpoints
 export const API_ROUTES = {
     AUTH: '/api/auth',
-    ACCOUNTS: '/api/accounts',
     CATEGORIES: '/api/categories',
     TRANSACTIONS: '/api/transactions',
-    BUDGETS: '/api/budgets',
-    RECURRING: '/api/recurring',
+    DASHBOARD: '/api/dashboard',
 } as const;
 
 // Local storage keys

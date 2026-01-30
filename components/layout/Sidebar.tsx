@@ -21,9 +21,7 @@ interface NavItem {
 const navItems: NavItem[] = [
     { label: 'Dashboard', href: '/dashboard', icon: 'Home' },
     { label: 'Transactions', href: '/transactions', icon: 'ArrowsRightLeft' },
-    { label: 'Accounts', href: '/accounts', icon: 'Wallet' },
     { label: 'Categories', href: '/categories', icon: 'Tag' },
-    { label: 'Budgets', href: '/budgets', icon: 'ChartBar' },
 ];
 
 const bottomNavItems: NavItem[] = [
