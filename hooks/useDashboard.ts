@@ -32,6 +32,7 @@ interface UseDashboardReturn {
     recentTransactions: Transaction[];
     weeklySpending: number[];
     dailySpending: number[];
+    hourlySpending: number[];
     monthlySpending: number[];
     month: string;
 
@@ -54,6 +55,7 @@ export function useDashboard(): UseDashboardReturn {
     const [recentTransactions, setRecentTransactions] = useState<Transaction[]>([]);
     const [weeklySpending, setWeeklySpending] = useState<number[]>([0, 0, 0, 0]);
     const [dailySpending, setDailySpending] = useState<number[]>([0, 0, 0, 0, 0, 0, 0]);
+    const [hourlySpending, setHourlySpending] = useState<number[]>([0, 0, 0, 0, 0, 0]);
     const [monthlySpending, setMonthlySpending] = useState<number[]>([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -76,6 +78,7 @@ export function useDashboard(): UseDashboardReturn {
             setRecentTransactions(data.recentTransactions || []);
             setWeeklySpending(data.weeklySpending || [0, 0, 0, 0]);
             setDailySpending(data.dailySpending || [0, 0, 0, 0, 0, 0, 0]);
+            setHourlySpending(data.hourlySpending || [0, 0, 0, 0, 0, 0]);
             setMonthlySpending(data.monthlySpending || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -108,6 +111,7 @@ export function useDashboard(): UseDashboardReturn {
         recentTransactions,
         weeklySpending,
         dailySpending,
+        hourlySpending,
         monthlySpending,
         month,
         isLoading,

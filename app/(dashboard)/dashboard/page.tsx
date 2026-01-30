@@ -33,6 +33,7 @@ export default function DashboardPage() {
         recentTransactions,
         weeklySpending,
         dailySpending,
+        hourlySpending,
         monthlySpending,
         isLoading,
         showBalance,
@@ -96,6 +97,7 @@ export default function DashboardPage() {
                                 change={stats?.expense.change || 0}
                                 weeklyData={weeklySpending}
                                 dailyData={dailySpending}
+                                hourlyData={hourlySpending}
                                 monthlyData={monthlySpending}
                             />
                         )}
@@ -123,6 +125,7 @@ export default function DashboardPage() {
                     recentTransactions={recentTransactions}
                     weeklySpending={weeklySpending}
                     dailySpending={dailySpending}
+                    hourlySpending={hourlySpending}
                     monthlySpending={monthlySpending}
                     totalBalance={totalBalance}
                     showBalance={showBalance}
@@ -143,6 +146,7 @@ interface DesktopDashboardProps {
     recentTransactions: ReturnType<typeof useDashboard>['recentTransactions'];
     weeklySpending: number[];
     dailySpending: number[];
+    hourlySpending: number[];
     monthlySpending: number[];
     totalBalance: number;
     showBalance: boolean;
@@ -155,6 +159,7 @@ function DesktopDashboard({
     recentTransactions,
     weeklySpending,
     dailySpending,
+    hourlySpending,
     monthlySpending,
     totalBalance,
     showBalance,
@@ -236,6 +241,7 @@ function DesktopDashboard({
                             change={stats?.expense.change || 0}
                             weeklyData={weeklySpending}
                             dailyData={dailySpending}
+                            hourlyData={hourlySpending}
                             monthlyData={monthlySpending}
                         />
                     )}

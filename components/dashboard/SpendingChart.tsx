@@ -7,7 +7,7 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useLanguage } from '@/components/providers';
 
 type Period = 'today' | 'week' | 'month' | 'year';
@@ -25,6 +25,7 @@ interface SpendingChartProps {
     change: number;
     weeklyData?: number[];
     dailyData?: number[];
+    hourlyData?: number[];
     monthlyData?: number[];
     onPeriodChange?: (period: Period) => void;
 }
@@ -34,12 +35,14 @@ export function SpendingChart({
     change,
     weeklyData,
     dailyData,
+    hourlyData,
     monthlyData,
     onPeriodChange,
 }: SpendingChartProps) {
     const { t } = useLanguage();
     const [period, setPeriod] = useState<Period>('month');
     const [tooltip, setTooltip] = useState<TooltipData | null>(null);
+    const touchedRef = useRef(false);
 
     const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -58,8 +61,8 @@ export function SpendingChart({
     const getData = (): number[] => {
         switch (period) {
             case 'today':
-                // Hourly data (6 points: 4h intervals)
-                return dailyData || [0, 0, 0, 0, 0, 0];
+                // Hourly data (6 time slots: 6AM, 10AM, 2PM, 6PM, 10PM, Now)
+                return hourlyData || [0, 0, 0, 0, 0, 0];
             case 'week':
                 // Daily data (7 days)
                 return dailyData || [0, 0, 0, 0, 0, 0, 0];
@@ -178,7 +181,7 @@ export function SpendingChart({
         }).format(value);
     }, []);
 
-    // Handle tooltip show/hide
+    // Handle tooltip show/hide - supports both hover (desktop) and tap (mobile)
     const handleShowTooltip = useCallback((index: number, x: number, y: number) => {
         const value = period === 'year' ? rawData[index] : chartData[index];
         setTooltip({
@@ -193,6 +196,36 @@ export function SpendingChart({
     const handleHideTooltip = useCallback(() => {
         setTooltip(null);
     }, []);
+
+    // Toggle tooltip on tap (for mobile)
+    const handleToggleTooltip = useCallback((index: number, x: number, y: number, isTouch = false) => {
+        if (isTouch) {
+            touchedRef.current = true;
+            // Reset after a short delay to allow click events to be ignored
+            setTimeout(() => { touchedRef.current = false; }, 300);
+        }
+
+        if (tooltip?.index === index) {
+            setTooltip(null);
+        } else {
+            const value = period === 'year' ? rawData[index] : chartData[index];
+            setTooltip({
+                index,
+                value,
+                label: labels[index],
+                x,
+                y,
+            });
+        }
+    }, [tooltip, period, rawData, chartData, labels]);
+
+    // Click handler that ignores clicks from touch events
+    const handleClickTooltip = useCallback((e: React.MouseEvent, index: number, x: number, y: number) => {
+        e.stopPropagation();
+        // Ignore if this click was triggered by a touch event
+        if (touchedRef.current) return;
+        handleToggleTooltip(index, x, y);
+    }, [handleToggleTooltip]);
 
     return (
         <div className="rounded-2xl bg-[#0f1610] p-4 sm:p-5 border border-[#1a2f1a]">
@@ -225,7 +258,7 @@ export function SpendingChart({
             </div>
 
             {/* Line Chart */}
-            <div className="relative h-20 sm:h-24 mb-3 sm:mb-4" onMouseLeave={handleHideTooltip}>
+            <div className="relative h-20 sm:h-24 mb-3 sm:mb-4" onMouseLeave={handleHideTooltip} onClick={handleHideTooltip} onTouchStart={handleHideTooltip}>
                 {/* Tooltip */}
                 {tooltip && (
                     <div
@@ -252,6 +285,9 @@ export function SpendingChart({
                 ) : period === 'year' ? (
                     /* Bar chart for year view */
                     <svg className="w-full h-full" viewBox="0 0 300 80" preserveAspectRatio="none">
+                        {/* Background rect to capture clicks and close tooltip */}
+                        <rect x="0" y="0" width="300" height="80" fill="transparent" onClick={handleHideTooltip} />
+
                         {/* Grid lines */}
                         <line x1="0" y1="40" x2="300" y2="40" stroke="#1a2f1a" strokeWidth="1" strokeDasharray="4" />
                         <line x1="0" y1="80" x2="300" y2="80" stroke="#1a2f1a" strokeWidth="1" />
@@ -273,18 +309,23 @@ export function SpendingChart({
                                         rx="2"
                                         opacity={point > 0 ? (tooltip?.index === i ? 1 : 0.8) : 0.3}
                                         className="cursor-pointer transition-opacity"
+                                        style={{ touchAction: 'manipulation' }}
                                         onMouseEnter={() => handleShowTooltip(i, x + barWidth / 2, barY)}
-                                        onMouseLeave={handleHideTooltip}
+                                        onTouchStart={(e) => { e.stopPropagation(); handleToggleTooltip(i, x + barWidth / 2, barY, true); }}
+                                        onClick={(e) => handleClickTooltip(e, i, x + barWidth / 2, barY)}
                                     />
-                                    {/* Larger invisible hit area for easier hover */}
+                                    {/* Larger invisible hit area for easier hover/tap */}
                                     <rect
-                                        x={x - 2}
+                                        x={x - 4}
                                         y={0}
-                                        width={barWidth + 4}
+                                        width={barWidth + 8}
                                         height={80}
                                         fill="transparent"
                                         className="cursor-pointer"
+                                        style={{ touchAction: 'manipulation' }}
                                         onMouseEnter={() => handleShowTooltip(i, x + barWidth / 2, barY)}
+                                        onTouchStart={(e) => { e.stopPropagation(); handleToggleTooltip(i, x + barWidth / 2, barY, true); }}
+                                        onClick={(e) => handleClickTooltip(e, i, x + barWidth / 2, barY)}
                                     />
                                 </g>
                             );
@@ -293,6 +334,9 @@ export function SpendingChart({
                 ) : (
                     /* Line chart for other periods */
                     <svg className="w-full h-full" viewBox="0 0 300 80" preserveAspectRatio="none">
+                        {/* Background rect to capture clicks and close tooltip */}
+                        <rect x="0" y="0" width="300" height="80" fill="transparent" onClick={handleHideTooltip} />
+
                         {/* Grid lines */}
                         <line x1="0" y1="40" x2="300" y2="40" stroke="#1a2f1a" strokeWidth="1" strokeDasharray="4" />
 
@@ -347,14 +391,17 @@ export function SpendingChart({
                                                     opacity={0.2}
                                                 />
                                             )}
-                                            {/* Larger invisible hit area for easier hover */}
+                                            {/* Larger invisible hit area for easier hover/tap */}
                                             <circle
                                                 cx={cx}
                                                 cy={cy}
-                                                r={15}
+                                                r={20}
                                                 fill="transparent"
                                                 className="cursor-pointer"
+                                                style={{ touchAction: 'manipulation' }}
                                                 onMouseEnter={() => handleShowTooltip(i, cx, cy)}
+                                                onTouchStart={(e) => { e.stopPropagation(); handleToggleTooltip(i, cx, cy, true); }}
+                                                onClick={(e) => handleClickTooltip(e, i, cx, cy)}
                                             />
                                         </g>
                                     );

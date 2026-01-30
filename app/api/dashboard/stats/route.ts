@@ -16,6 +16,45 @@ interface Transaction {
     date: string;
     amount: number;
     categoryId: string;
+    createdAt?: string;
+}
+
+// Calculate hourly spending for today (6 time slots: 6AM, 10AM, 2PM, 6PM, 10PM, Now)
+function calculateHourlySpending(transactions: Transaction[]): number[] {
+    const slots: number[] = [0, 0, 0, 0, 0, 0];
+    const now = new Date();
+    const todayStr = now.toISOString().slice(0, 10);
+
+    // Filter today's expenses
+    const todayExpenses = transactions.filter(t =>
+        t.type === 'expense' && t.date.startsWith(todayStr)
+    );
+
+    // Time slot boundaries (hours)
+    // Slot 0: 0-6 (before 6AM)
+    // Slot 1: 6-10 (6AM-10AM)
+    // Slot 2: 10-14 (10AM-2PM)
+    // Slot 3: 14-18 (2PM-6PM)
+    // Slot 4: 18-22 (6PM-10PM)
+    // Slot 5: 22-24 (10PM-Now)
+
+    todayExpenses.forEach(t => {
+        // Use createdAt if available, otherwise try to parse date
+        const timestamp = t.createdAt ? new Date(t.createdAt) : new Date(t.date);
+        const hour = timestamp.getHours();
+
+        let slotIndex: number;
+        if (hour < 6) slotIndex = 0;
+        else if (hour < 10) slotIndex = 1;
+        else if (hour < 14) slotIndex = 2;
+        else if (hour < 18) slotIndex = 3;
+        else if (hour < 22) slotIndex = 4;
+        else slotIndex = 5;
+
+        slots[slotIndex] += Number(t.amount);
+    });
+
+    return slots;
 }
 
 // Calculate weekly spending for the chart (4 weeks of current month)
@@ -188,6 +227,7 @@ export async function GET(request: NextRequest) {
         // Calculate spending data for charts
         const weeklySpending = calculateWeeklySpending(monthTransactions);
         const dailySpending = calculateDailySpending(allTransactions);
+        const hourlySpending = calculateHourlySpending(allTransactions);
         const monthlySpending = calculateMonthlySpending(allTransactions);
 
         return NextResponse.json({
@@ -202,6 +242,7 @@ export async function GET(request: NextRequest) {
             recentTransactions,
             weeklySpending,
             dailySpending,
+            hourlySpending,
             monthlySpending,
         });
     } catch (error) {
