@@ -2,15 +2,23 @@
 // SPENDING CHART COMPONENT
 //
 // Shows spending trend with simple line visualization
-// Features: Period filter, weekly/daily breakdown
+// Features: Period filter, weekly/daily breakdown, tooltips
 // =====================================================
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useLanguage } from '@/components/providers';
 
 type Period = 'today' | 'week' | 'month' | 'year';
+
+interface TooltipData {
+    index: number;
+    value: number;
+    label: string;
+    x: number;
+    y: number;
+}
 
 interface SpendingChartProps {
     amount: number;
@@ -31,6 +39,7 @@ export function SpendingChart({
 }: SpendingChartProps) {
     const { t } = useLanguage();
     const [period, setPeriod] = useState<Period>('month');
+    const [tooltip, setTooltip] = useState<TooltipData | null>(null);
 
     const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -159,6 +168,32 @@ export function SpendingChart({
         ? labels.filter((_, i) => i % 3 === 0) // Show every 3rd month for year
         : labels;
 
+    // Format currency for tooltip
+    const formatCurrency = useCallback((value: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+        }).format(value);
+    }, []);
+
+    // Handle tooltip show/hide
+    const handleShowTooltip = useCallback((index: number, x: number, y: number) => {
+        const value = period === 'year' ? rawData[index] : chartData[index];
+        setTooltip({
+            index,
+            value,
+            label: labels[index],
+            x,
+            y,
+        });
+    }, [period, rawData, chartData, labels]);
+
+    const handleHideTooltip = useCallback(() => {
+        setTooltip(null);
+    }, []);
+
     return (
         <div className="rounded-2xl bg-[#0f1610] p-5 border border-[#1a2f1a]">
             {/* Header with Period Filter */}
@@ -190,7 +225,26 @@ export function SpendingChart({
             </div>
 
             {/* Line Chart */}
-            <div className="relative h-24 mb-4">
+            <div className="relative h-24 mb-4" onMouseLeave={handleHideTooltip}>
+                {/* Tooltip */}
+                {tooltip && (
+                    <div
+                        className="absolute z-10 px-3 py-2 text-xs font-medium text-white bg-[#1a2a1a] border border-[#2a3f2a] rounded-lg shadow-lg pointer-events-none transform -translate-x-1/2 -translate-y-full"
+                        style={{
+                            left: `${(tooltip.x / 300) * 100}%`,
+                            top: `${(tooltip.y / 80) * 100}%`,
+                            marginTop: '-8px',
+                        }}
+                    >
+                        <div className="text-[#22c55e] font-bold">{formatCurrency(tooltip.value)}</div>
+                        <div className="text-gray-400 text-center">{tooltip.label}</div>
+                        {/* Arrow */}
+                        <div className="absolute left-1/2 bottom-0 transform -translate-x-1/2 translate-y-full">
+                            <div className="border-4 border-transparent border-t-[#2a3f2a]" />
+                        </div>
+                    </div>
+                )}
+
                 {!hasData ? (
                     <div className="w-full h-full flex items-center justify-center text-gray-500 text-sm">
                         {t('chart.noData')}
@@ -207,17 +261,32 @@ export function SpendingChart({
                             const barWidth = 300 / 12 - 4;
                             const x = (i / 12) * 300 + 2;
                             const height = (point / 100) * 75;
+                            const barY = 80 - height;
                             return (
-                                <rect
-                                    key={i}
-                                    x={x}
-                                    y={80 - height}
-                                    width={barWidth}
-                                    height={height}
-                                    fill={point > 0 ? '#22c55e' : '#1a2f1a'}
-                                    rx="2"
-                                    opacity={point > 0 ? 0.8 : 0.3}
-                                />
+                                <g key={i}>
+                                    <rect
+                                        x={x}
+                                        y={barY}
+                                        width={barWidth}
+                                        height={height}
+                                        fill={tooltip?.index === i ? '#16a34a' : (point > 0 ? '#22c55e' : '#1a2f1a')}
+                                        rx="2"
+                                        opacity={point > 0 ? (tooltip?.index === i ? 1 : 0.8) : 0.3}
+                                        className="cursor-pointer transition-opacity"
+                                        onMouseEnter={() => handleShowTooltip(i, x + barWidth / 2, barY)}
+                                        onMouseLeave={handleHideTooltip}
+                                    />
+                                    {/* Larger invisible hit area for easier hover */}
+                                    <rect
+                                        x={x - 2}
+                                        y={0}
+                                        width={barWidth + 4}
+                                        height={80}
+                                        fill="transparent"
+                                        className="cursor-pointer"
+                                        onMouseEnter={() => handleShowTooltip(i, x + barWidth / 2, barY)}
+                                    />
+                                </g>
                             );
                         })}
                     </svg>
@@ -252,16 +321,44 @@ export function SpendingChart({
                                 />
 
                                 {/* Data points */}
-                                {dataPoints.map((point, i) => (
-                                    <circle
-                                        key={i}
-                                        cx={(i / (dataPoints.length - 1)) * 300}
-                                        cy={80 - (point / 100) * 80}
-                                        r={i === dataPoints.length - 1 ? 4 : 2}
-                                        fill="#22c55e"
-                                        opacity={i === dataPoints.length - 1 ? 1 : 0.5}
-                                    />
-                                ))}
+                                {dataPoints.map((point, i) => {
+                                    const cx = (i / (dataPoints.length - 1)) * 300;
+                                    const cy = 80 - (point / 100) * 80;
+                                    const isHovered = tooltip?.index === i;
+                                    const isLast = i === dataPoints.length - 1;
+                                    return (
+                                        <g key={i}>
+                                            {/* Visible point */}
+                                            <circle
+                                                cx={cx}
+                                                cy={cy}
+                                                r={isHovered ? 6 : (isLast ? 4 : 2)}
+                                                fill="#22c55e"
+                                                opacity={isHovered || isLast ? 1 : 0.5}
+                                                className="transition-all duration-150"
+                                            />
+                                            {/* Hover ring for selected point */}
+                                            {isHovered && (
+                                                <circle
+                                                    cx={cx}
+                                                    cy={cy}
+                                                    r={10}
+                                                    fill="#22c55e"
+                                                    opacity={0.2}
+                                                />
+                                            )}
+                                            {/* Larger invisible hit area for easier hover */}
+                                            <circle
+                                                cx={cx}
+                                                cy={cy}
+                                                r={15}
+                                                fill="transparent"
+                                                className="cursor-pointer"
+                                                onMouseEnter={() => handleShowTooltip(i, cx, cy)}
+                                            />
+                                        </g>
+                                    );
+                                })}
                             </>
                         )}
                     </svg>

@@ -1,6 +1,6 @@
 // =====================================================
 // TRANSACTION ITEM
-// 
+//
 // Single transaction row with icon, details, and amount
 // Includes Action Menu (Edit/Delete)
 // =====================================================
@@ -10,23 +10,34 @@
 import { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Icons } from '@/components/ui';
+import { useLanguage } from '@/components/providers';
 
 interface TransactionItemProps {
     note: string;
     categoryName: string;
     amount: number;
     type: 'income' | 'expense';
+    date?: string; // ISO date string
     onEdit?: () => void;
     onDelete?: () => void;
 }
 
-export function TransactionItem({ note, categoryName, amount, type, onEdit, onDelete }: TransactionItemProps) {
+export function TransactionItem({ note, categoryName, amount, type, date, onEdit, onDelete }: TransactionItemProps) {
+    const { t, language } = useLanguage();
     const isIncome = type === 'income';
 
     const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD'
     }).format(amount);
+
+    // Format date for display
+    const formattedDate = date
+        ? new Date(date).toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', {
+            month: 'short',
+            day: 'numeric',
+        })
+        : '';
 
     // Menu State
     const [showMenu, setShowMenu] = useState(false);
@@ -112,7 +123,7 @@ export function TransactionItem({ note, categoryName, amount, type, onEdit, onDe
                     {note || categoryName}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                    {categoryName}
+                    {categoryName}{formattedDate && ` · ${formattedDate}`}
                 </p>
             </div>
 
@@ -149,7 +160,7 @@ export function TransactionItem({ note, categoryName, amount, type, onEdit, onDe
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors text-left"
                     >
                         <Icons.Pencil className="w-4 h-4" />
-                        Edit
+                        {t('common.edit')}
                     </button>
                     <div className="h-px bg-[#2a3f2a]" />
                     <button
@@ -157,7 +168,7 @@ export function TransactionItem({ note, categoryName, amount, type, onEdit, onDe
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors text-left"
                     >
                         <Icons.Trash className="w-4 h-4" />
-                        Delete
+                        {t('common.delete')}
                     </button>
                 </div>,
                 document.body

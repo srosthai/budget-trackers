@@ -42,59 +42,71 @@ export default function DashboardPage() {
     // Use total balance from stats
     const totalBalance = stats?.totalBalance.amount || 0;
 
-    if (isLoading) {
-        return <LoadingSkeleton />;
-    }
-
     return (
         <div className="min-h-screen bg-[#0a0f0a]">
             {/* Mobile Layout */}
             <div className="lg:hidden">
                 <div className="px-4 pb-24">
-                    {/* Mobile Header */}
+                    {/* Mobile Header - Always visible */}
                     <MobileHeader />
 
                     {/* Balance Card */}
                     <div className="mb-4">
-                        <BalanceCard
-                            balance={totalBalance}
-                            showBalance={showBalance}
-                            onToggleVisibility={toggleBalanceVisibility}
-                            isPremium={false}
-                        />
+                        {isLoading ? (
+                            <BalanceCardSkeleton />
+                        ) : (
+                            <BalanceCard
+                                balance={totalBalance}
+                                showBalance={showBalance}
+                                onToggleVisibility={toggleBalanceVisibility}
+                                isPremium={false}
+                            />
+                        )}
                     </div>
 
                     {/* Stats Row */}
                     <div className="mb-4">
-                        <StatsRow
-                            income={{
-                                amount: stats?.income.amount || 0,
-                                change: stats?.income.change,
-                            }}
-                            expense={{
-                                amount: stats?.expense.amount || 0,
-                                change: stats?.expense.change,
-                            }}
-                            profit={{
-                                amount: stats?.netProfit.amount || 0,
-                                change: stats?.netProfit.change,
-                            }}
-                        />
+                        {isLoading ? (
+                            <StatsRowSkeleton />
+                        ) : (
+                            <StatsRow
+                                income={{
+                                    amount: stats?.income.amount || 0,
+                                    change: stats?.income.change,
+                                }}
+                                expense={{
+                                    amount: stats?.expense.amount || 0,
+                                    change: stats?.expense.change,
+                                }}
+                                profit={{
+                                    amount: stats?.netProfit.amount || 0,
+                                    change: stats?.netProfit.change,
+                                }}
+                            />
+                        )}
                     </div>
 
                     {/* Spending Chart */}
                     <div className="mb-4">
-                        <SpendingChart
-                            amount={stats?.expense.amount || 0}
-                            change={stats?.expense.change || 0}
-                            weeklyData={weeklySpending}
-                            dailyData={dailySpending}
-                            monthlyData={monthlySpending}
-                        />
+                        {isLoading ? (
+                            <ChartSkeleton />
+                        ) : (
+                            <SpendingChart
+                                amount={stats?.expense.amount || 0}
+                                change={stats?.expense.change || 0}
+                                weeklyData={weeklySpending}
+                                dailyData={dailySpending}
+                                monthlyData={monthlySpending}
+                            />
+                        )}
                     </div>
 
                     {/* Recent Transactions */}
-                    <RecentTransactions transactions={recentTransactions} limit={5} t={t} />
+                    {isLoading ? (
+                        <TransactionsSkeleton />
+                    ) : (
+                        <RecentTransactions transactions={recentTransactions} limit={5} t={t} />
+                    )}
                 </div>
 
                 {/* Bottom Navigation */}
@@ -115,6 +127,7 @@ export default function DashboardPage() {
                     totalBalance={totalBalance}
                     showBalance={showBalance}
                     toggleBalanceVisibility={toggleBalanceVisibility}
+                    isLoading={isLoading}
                 />
             </div>
         </div>
@@ -134,6 +147,7 @@ interface DesktopDashboardProps {
     totalBalance: number;
     showBalance: boolean;
     toggleBalanceVisibility: () => void;
+    isLoading: boolean;
 }
 
 function DesktopDashboard({
@@ -145,13 +159,14 @@ function DesktopDashboard({
     totalBalance,
     showBalance,
     toggleBalanceVisibility,
+    isLoading,
 }: DesktopDashboardProps) {
     const { t, language } = useLanguage();
     const currentMonth = new Date().toLocaleDateString(language === 'km' ? 'km-KH' : 'en-US', { month: 'long', year: 'numeric' });
 
     return (
         <div className="p-6 max-w-7xl mx-auto">
-            {/* Page Header */}
+            {/* Page Header - Always visible */}
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-white">{t('dashboard.title')}</h1>
                 <p className="text-gray-500">{currentMonth}</p>
@@ -161,36 +176,48 @@ function DesktopDashboard({
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
                 {/* Balance Card - Takes 1 column */}
                 <div className="xl:col-span-1">
-                    <BalanceCard
-                        balance={totalBalance}
-                        showBalance={showBalance}
-                        onToggleVisibility={toggleBalanceVisibility}
-                        isPremium={false}
-                    />
+                    {isLoading ? (
+                        <BalanceCardSkeleton />
+                    ) : (
+                        <BalanceCard
+                            balance={totalBalance}
+                            showBalance={showBalance}
+                            onToggleVisibility={toggleBalanceVisibility}
+                            isPremium={false}
+                        />
+                    )}
                 </div>
 
                 {/* Stats - Takes 2 columns */}
                 <div className="xl:col-span-2">
-                    <div className="grid grid-cols-3 gap-4 h-full">
-                        <StatCard
-                            label={t('dashboard.income')}
-                            amount={stats?.income.amount || 0}
-                            change={stats?.income.change}
-                            type="income"
-                        />
-                        <StatCard
-                            label={t('dashboard.expense')}
-                            amount={stats?.expense.amount || 0}
-                            change={stats?.expense.change}
-                            type="expense"
-                        />
-                        <StatCard
-                            label={t('dashboard.profit')}
-                            amount={stats?.netProfit.amount || 0}
-                            change={stats?.netProfit.change}
-                            type="profit"
-                        />
-                    </div>
+                    {isLoading ? (
+                        <div className="grid grid-cols-3 gap-4 h-full">
+                            {[1, 2, 3].map((i) => (
+                                <StatCardSkeleton key={i} />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-3 gap-4 h-full">
+                            <StatCard
+                                label={t('dashboard.income')}
+                                amount={stats?.income.amount || 0}
+                                change={stats?.income.change}
+                                type="income"
+                            />
+                            <StatCard
+                                label={t('dashboard.expense')}
+                                amount={stats?.expense.amount || 0}
+                                change={stats?.expense.change}
+                                type="expense"
+                            />
+                            <StatCard
+                                label={t('dashboard.profit')}
+                                amount={stats?.netProfit.amount || 0}
+                                change={stats?.netProfit.change}
+                                type="profit"
+                            />
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -198,19 +225,24 @@ function DesktopDashboard({
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                 {/* Left: Chart + Transactions */}
                 <div className="xl:col-span-3 space-y-6">
-                    <SpendingChart
-                        amount={stats?.expense.amount || 0}
-                        change={stats?.expense.change || 0}
-                        weeklyData={weeklySpending}
-                        dailyData={dailySpending}
-                        monthlyData={monthlySpending}
-                    />
-                    <RecentTransactions transactions={recentTransactions} limit={6} t={t} />
+                    {isLoading ? (
+                        <ChartSkeleton />
+                    ) : (
+                        <SpendingChart
+                            amount={stats?.expense.amount || 0}
+                            change={stats?.expense.change || 0}
+                            weeklyData={weeklySpending}
+                            dailyData={dailySpending}
+                            monthlyData={monthlySpending}
+                        />
+                    )}
+                    {isLoading ? (
+                        <TransactionsSkeleton />
+                    ) : (
+                        <RecentTransactions transactions={recentTransactions} limit={6} t={t} />
+                    )}
                 </div>
-
-                {/* Removed Accounts Card Column */}
             </div>
-
 
             {/* Floating Action Button */}
             <FloatingActionButton />
@@ -266,50 +298,114 @@ function StatCard({ label, amount, change, type }: StatCardProps) {
 }
 
 // =====================================================
-// LOADING SKELETON
+// INLINE SKELETON COMPONENTS
 // =====================================================
 
-function LoadingSkeleton() {
+function BalanceCardSkeleton() {
     return (
-        <div className="min-h-screen bg-[#0a0f0a] p-4 lg:p-6">
-            <div className="animate-pulse space-y-4">
-                {/* Header skeleton */}
-                <div className="flex items-center gap-3 mb-6">
-                    <div className="w-11 h-11 rounded-full bg-[#1a2a1a]" />
-                    <div className="space-y-2">
-                        <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
-                        <div className="w-28 h-4 rounded bg-[#1a2a1a]" />
+        <div className="h-40 rounded-2xl bg-[#0f1610] border border-[#1a2f1a] p-5 animate-pulse">
+            <div className="flex items-center justify-between mb-4">
+                <div className="w-24 h-4 rounded bg-[#1a2a1a]" />
+                <div className="w-8 h-8 rounded-lg bg-[#1a2a1a]" />
+            </div>
+            <div className="w-40 h-8 rounded bg-[#1a2a1a] mb-3" />
+            <div className="w-28 h-3 rounded bg-[#1a2a1a]" />
+        </div>
+    );
+}
+
+function StatsRowSkeleton() {
+    return (
+        <div className="grid grid-cols-3 gap-3">
+            {[1, 2, 3].map((i) => (
+                <div
+                    key={i}
+                    className="h-24 rounded-xl bg-[#0f1610] border border-[#1a2f1a] p-3 animate-pulse"
+                    style={{ animationDelay: `${i * 100}ms` }}
+                >
+                    <div className="flex items-center gap-2 mb-2">
+                        <div className="w-8 h-8 rounded-lg bg-[#1a2a1a]" />
+                        <div className="w-12 h-3 rounded bg-[#1a2a1a]" />
                     </div>
+                    <div className="w-20 h-5 rounded bg-[#1a2a1a]" />
                 </div>
+            ))}
+        </div>
+    );
+}
 
-                {/* Balance card skeleton */}
-                <div className="h-40 rounded-2xl bg-[#0f1610] border border-[#1a2f1a]" />
+function StatCardSkeleton() {
+    return (
+        <div className="rounded-xl bg-[#0f1610] p-5 border border-[#1a2f1a] h-full animate-pulse">
+            <div className="flex items-center justify-between mb-3">
+                <div className="w-16 h-4 rounded bg-[#1a2a1a]" />
+                <div className="w-10 h-10 rounded-lg bg-[#1a2a1a]" />
+            </div>
+            <div className="w-28 h-7 rounded bg-[#1a2a1a] mb-2" />
+            <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
+        </div>
+    );
+}
 
-                {/* Stats skeleton */}
-                <div className="grid grid-cols-3 gap-3">
+function ChartSkeleton() {
+    return (
+        <div className="rounded-2xl bg-[#0f1610] border border-[#1a2f1a] p-5 animate-pulse">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <div>
+                    <div className="w-24 h-4 rounded bg-[#1a2a1a] mb-2" />
+                    <div className="w-32 h-6 rounded bg-[#1a2a1a]" />
+                </div>
+                <div className="flex gap-2">
                     {[1, 2, 3].map((i) => (
-                        <div key={i} className="h-24 rounded-xl bg-[#0f1610] border border-[#1a2f1a]" />
+                        <div key={i} className="w-12 h-7 rounded-lg bg-[#1a2a1a]" />
                     ))}
                 </div>
+            </div>
+            {/* Chart area */}
+            <div className="h-32 flex items-end justify-between gap-2 pt-4">
+                {[40, 65, 45, 80, 55, 70, 50].map((h, i) => (
+                    <div
+                        key={i}
+                        className="flex-1 rounded-t bg-[#1a2a1a]"
+                        style={{ height: `${h}%`, animationDelay: `${i * 50}ms` }}
+                    />
+                ))}
+            </div>
+            {/* X-axis labels */}
+            <div className="flex justify-between mt-2">
+                {[1, 2, 3, 4, 5, 6, 7].map((i) => (
+                    <div key={i} className="w-6 h-3 rounded bg-[#1a2a1a]" />
+                ))}
+            </div>
+        </div>
+    );
+}
 
-                {/* Chart skeleton */}
-                <div className="h-48 rounded-2xl bg-[#0f1610] border border-[#1a2f1a]" />
-
-                {/* Transactions skeleton */}
-                <div className="rounded-2xl bg-[#0f1610] border border-[#1a2f1a] p-5">
-                    <div className="space-y-3">
-                        {[1, 2, 3].map((i) => (
-                            <div key={i} className="flex items-center gap-3">
-                                <div className="w-11 h-11 rounded-xl bg-[#1a2a1a]" />
-                                <div className="flex-1 space-y-2">
-                                    <div className="w-32 h-4 rounded bg-[#1a2a1a]" />
-                                    <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
-                                </div>
-                                <div className="w-20 h-4 rounded bg-[#1a2a1a]" />
-                            </div>
-                        ))}
+function TransactionsSkeleton() {
+    return (
+        <div className="rounded-2xl bg-[#0f1610] border border-[#1a2f1a] p-5">
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+                <div className="w-32 h-5 rounded bg-[#1a2a1a] animate-pulse" />
+                <div className="w-16 h-4 rounded bg-[#1a2a1a] animate-pulse" />
+            </div>
+            {/* Items */}
+            <div className="space-y-3">
+                {[1, 2, 3, 4].map((i) => (
+                    <div
+                        key={i}
+                        className="flex items-center gap-3 animate-pulse"
+                        style={{ animationDelay: `${i * 100}ms` }}
+                    >
+                        <div className="w-11 h-11 rounded-xl bg-[#1a2a1a]" />
+                        <div className="flex-1 space-y-2">
+                            <div className="w-32 h-4 rounded bg-[#1a2a1a]" />
+                            <div className="w-20 h-3 rounded bg-[#1a2a1a]" />
+                        </div>
+                        <div className="w-20 h-4 rounded bg-[#1a2a1a]" />
                     </div>
-                </div>
+                ))}
             </div>
         </div>
     );

@@ -15,6 +15,7 @@ export interface Category {
     icon?: string;
     color?: string;
     parentCategoryId?: string;
+    totalAmount?: number;
     // Subcategories logic will be handled in hook
     subcategories?: Category[];
 }

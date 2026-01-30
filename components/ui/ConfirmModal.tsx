@@ -1,12 +1,13 @@
 // =====================================================
 // CONFIRM MODAL COMPONENT
-// 
+//
 // Reusable dialog for confirmations (Delete, etc.)
 // =====================================================
 
 'use client';
 
 import { Icons } from './Icons';
+import { useLanguage } from '@/components/providers';
 
 interface ConfirmModalProps {
     isOpen: boolean;
@@ -15,6 +16,7 @@ interface ConfirmModalProps {
     title: string;
     description: string;
     confirmText?: string;
+    loadingText?: string;
     cancelText?: string;
     variant?: 'danger' | 'default';
     isLoading?: boolean;
@@ -26,11 +28,19 @@ export function ConfirmModal({
     onConfirm,
     title,
     description,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
+    confirmText,
+    loadingText,
+    cancelText,
     variant = 'danger',
     isLoading = false,
 }: ConfirmModalProps) {
+    const { t } = useLanguage();
+
+    // Use provided text or fall back to i18n defaults
+    const resolvedConfirmText = confirmText || t('common.confirm');
+    const resolvedCancelText = cancelText || t('common.cancel');
+    const resolvedLoadingText = loadingText || t('common.loading');
+
     if (!isOpen) return null;
 
     return (
@@ -64,7 +74,7 @@ export function ConfirmModal({
                         disabled={isLoading}
                         className="flex-1 h-12 sm:h-11 rounded-xl border border-[#2a3f2a] text-gray-400 hover:text-white hover:bg-white/5 font-semibold transition-all disabled:opacity-50 active:scale-[0.98]"
                     >
-                        {cancelText}
+                        {resolvedCancelText}
                     </button>
                     <button
                         onClick={onConfirm}
@@ -77,10 +87,10 @@ export function ConfirmModal({
                         {isLoading ? (
                             <>
                                 <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                                Processing
+                                {resolvedLoadingText}
                             </>
                         ) : (
-                            confirmText
+                            resolvedConfirmText
                         )}
                     </button>
                 </div>

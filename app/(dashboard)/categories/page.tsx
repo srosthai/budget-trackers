@@ -1,10 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Icons } from '@/components/ui';
+import { Icons, ConfirmModal } from '@/components/ui';
 import { useCategories, Category } from '@/hooks';
-import { CategoryListItem, CategoryModal } from '@/components/settings';
-import { ConfirmModal } from '@/components/ui';
+import { CategoryListItem, CategoryModal } from '@/components/categories';
 import { BottomNavigation } from '@/components/dashboard';
 import { useLanguage } from '@/components/providers';
 
@@ -40,11 +39,6 @@ export default function CategoriesPage() {
     const filteredCategories = activeCategories.filter(c =>
         c.name.toLowerCase().includes(search.toLowerCase())
     );
-
-    // Show skeleton while loading
-    if (isLoading) {
-        return <CategoriesSkeleton />;
-    }
 
     const handleAdd = () => {
         setEditingCategory(undefined);
@@ -125,7 +119,12 @@ export default function CategoriesPage() {
 
                 {/* Category List */}
                 <div className="space-y-3">
-                    {filteredCategories.length > 0 ? (
+                    {isLoading ? (
+                        // Skeleton items while loading
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <CategoryItemSkeleton key={i} delay={i * 100} />
+                        ))
+                    ) : filteredCategories.length > 0 ? (
                         filteredCategories.map(cat => (
                             <CategoryListItem
                                 key={cat.categoryId}
@@ -191,39 +190,29 @@ export default function CategoriesPage() {
 }
 
 // =====================================================
-// SKELETON LOADER
+// SKELETON LOADER (Item Only)
 // =====================================================
 
-function CategoriesSkeleton() {
+function CategoryItemSkeleton({ delay = 0 }: { delay?: number }) {
     return (
-        <div className="min-h-screen bg-[#0a0f0a] flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4">
-                <div className="w-28 h-7 rounded bg-[#1a2a1a] animate-pulse" />
-                <div className="w-9 h-9 rounded-lg bg-[#1a2a1a] animate-pulse" />
+        <div
+            className="p-3 rounded-xl bg-[#1a2a1a] border border-[#2a3f2a] flex items-center gap-3"
+            style={{ animationDelay: `${delay}ms` }}
+        >
+            {/* Icon */}
+            <div className="w-10 h-10 rounded-xl bg-[#2a3f2a] animate-pulse" />
+
+            {/* Name & Subcategory */}
+            <div className="flex-1 min-w-0">
+                <div className="w-24 h-4 rounded bg-[#2a3f2a] mb-1.5 animate-pulse" />
+                <div className="w-16 h-3 rounded bg-[#2a3f2a]/50 animate-pulse" />
             </div>
 
-            <div className="flex-1 px-4 pb-24">
-                {/* Tab skeleton */}
-                <div className="h-12 rounded-xl bg-[#1a2a1a] animate-pulse mb-4" />
+            {/* Amount */}
+            <div className="w-16 h-4 rounded bg-[#2a3f2a]/60 animate-pulse" />
 
-                {/* Search skeleton */}
-                <div className="h-12 rounded-xl bg-[#1a2a1a] animate-pulse mb-4" />
-
-                {/* Categories skeleton */}
-                <div className="space-y-3">
-                    {[1, 2, 3, 4].map((i) => (
-                        <div key={i} className="p-3 rounded-xl bg-[#1a2a1a] border border-[#2a3f2a] flex items-center gap-3 animate-pulse">
-                            <div className="w-10 h-10 rounded-xl bg-[#2a3f2a]" />
-                            <div className="flex-1">
-                                <div className="w-24 h-4 rounded bg-[#2a3f2a] mb-1" />
-                                <div className="w-16 h-3 rounded bg-[#2a3f2a]" />
-                            </div>
-                            <div className="w-6 h-6 rounded bg-[#2a3f2a]" />
-                        </div>
-                    ))}
-                </div>
-            </div>
+            {/* Action Button */}
+            <div className="w-8 h-8 rounded-lg bg-[#2a3f2a]/50 animate-pulse" />
         </div>
     );
 }

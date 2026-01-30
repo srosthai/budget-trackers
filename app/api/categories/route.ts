@@ -23,7 +23,16 @@ interface Category {
     [key: string]: unknown;
 }
 
-// GET - List all categories for current user
+interface Transaction {
+    transactionId: string;
+    userId: string;
+    categoryId: string;
+    amount: number;
+    type: 'income' | 'expense';
+    [key: string]: unknown;
+}
+
+// GET - List all categories for current user (with transaction totals)
 export async function GET() {
     try {
         const session = await auth();
@@ -32,11 +41,29 @@ export async function GET() {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const categories = await getRowsWhere<Category>(SHEETS.CATEGORIES, {
-            userId: session.user.id,
+        // Fetch categories and transactions in parallel
+        const [categories, transactions] = await Promise.all([
+            getRowsWhere<Category>(SHEETS.CATEGORIES, { userId: session.user.id }),
+            getRowsWhere<Transaction>(SHEETS.TRANSACTIONS, { userId: session.user.id }),
+        ]);
+
+        // Calculate total amount per category
+        const categoryTotals: Record<string, number> = {};
+        transactions.forEach((tx) => {
+            const catId = tx.categoryId;
+            if (catId) {
+                const amount = parseFloat(String(tx.amount)) || 0;
+                categoryTotals[catId] = (categoryTotals[catId] || 0) + amount;
+            }
         });
 
-        return NextResponse.json({ categories });
+        // Attach totalAmount to each category
+        const categoriesWithTotals = categories.map((cat) => ({
+            ...cat,
+            totalAmount: categoryTotals[cat.categoryId] || 0,
+        }));
+
+        return NextResponse.json({ categories: categoriesWithTotals });
     } catch (error) {
         console.error('Error fetching categories:', error);
         return NextResponse.json(

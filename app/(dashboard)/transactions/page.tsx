@@ -31,6 +31,7 @@ function TransactionsContent() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingTx, setEditingTx] = useState<Transaction | null>(null);
     const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const [defaultType, setDefaultType] = useState<'expense' | 'income'>('expense');
 
     // Handle query params for opening modal with specific type
@@ -114,6 +115,7 @@ function TransactionsContent() {
                                             categoryName={getCategoryName(tx.categoryId)}
                                             amount={tx.amount}
                                             type={tx.type}
+                                            date={tx.date}
                                             onEdit={() => handleEdit(tx)}
                                             onDelete={() => handleDelete(tx.transactionId)}
                                         />
@@ -157,10 +159,16 @@ function TransactionsContent() {
                 isOpen={!!deleteId}
                 title={t('transactions.deleteTransaction')}
                 description={t('transactions.deleteConfirm')}
+                confirmText={t('common.delete')}
+                loadingText={t('common.deleting')}
+                cancelText={t('common.cancel')}
+                isLoading={isDeleting}
                 onClose={() => setDeleteId(null)}
                 onConfirm={async () => {
                     if (deleteId) {
+                        setIsDeleting(true);
                         await deleteTransaction(deleteId);
+                        setIsDeleting(false);
                         setDeleteId(null);
                     }
                 }}
