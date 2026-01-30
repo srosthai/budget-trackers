@@ -29,7 +29,7 @@ export function FloatingActionButton({ onClick }: FABProps) {
     };
 
     return (
-        <div className="fixed right-3 sm:right-4 bottom-24 sm:bottom-20 lg:bottom-6 z-40">
+        <div className="fixed right-3 sm:right-4 z-40 fab-position">
             {/* Quick action menu */}
             {isExpanded && (
                 <div className="absolute bottom-16 right-0 flex flex-col gap-2 sm:gap-3 animate-fade-in">

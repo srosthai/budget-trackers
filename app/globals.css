@@ -778,6 +778,17 @@ body {
   padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
 }
 
+/* FAB positioning above bottom nav with safe area */
+.fab-position {
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (min-width: 1024px) {
+  .fab-position {
+    bottom: 1.5rem;
+  }
+}
+
 /* =====================================================
    MOBILE TOUCH OPTIMIZATIONS
    ===================================================== */
