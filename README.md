@@ -17,12 +17,14 @@ A mobile-first personal finance application built with Next.js 16, Auth.js, and 
 - 💸 **Transactions** - Add, edit, and delete income/expense records
 - 🏷️ **Categories** - Organize transactions with custom categories
 - 🔐 **Authentication** - Secure login with Google OAuth or email/password
+- 🌍 **Multi-language** - English and Khmer (ភាសាខ្មែរ) support
 
 ### UI/UX
 - 📱 **Mobile-first design** - Optimized for mobile devices
-- 🌙 **Dark theme** - Beautiful dark green color scheme
+- 🌙 **Dark/Light theme** - Toggle between dark and light modes
 - ⚡ **Fast & responsive** - Optimized performance
 - 🎨 **Modern UI** - Glassmorphism and smooth animations
+- 📐 **Consistent styling** - Unified header padding across all pages
 
 ---
 
@@ -48,15 +50,17 @@ budget-tracker/
 │   │   ├── dashboard/
 │   │   ├── transactions/
 │   │   ├── categories/
-│   │   └── settings/
+│   │   └── profile/
 │   └── api/              # API routes
 ├── components/
 │   ├── dashboard/        # Dashboard components
 │   ├── transactions/     # Transaction components
-│   ├── settings/         # Settings components
+│   ├── categories/       # Category components
+│   ├── providers/        # Context providers (Theme, Language)
 │   └── ui/               # Shared UI components
 ├── hooks/                # Custom React hooks
 ├── lib/                  # Utilities & configs
+├── messages/             # i18n translation files (en.json, km.json)
 └── public/               # Static assets
 ```
 

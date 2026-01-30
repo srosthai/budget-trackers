@@ -394,30 +394,30 @@ A personal budget tracker application that allows users to:
 
 ### Phase 1: Foundation (Days 1-2)
 
-- [ ] **Step 1.1**: Set up project structure
+- [x] **Step 1.1**: Set up project structure
   - Create folder structure
   - Install dependencies
   - Configure TypeScript
 
-- [ ] **Step 1.2**: Setup Google Cloud & Sheets
+- [x] **Step 1.2**: Setup Google Cloud & Sheets
   - Create Google Cloud project
   - Enable Google Sheets API
   - Create service account
   - Download credentials JSON
   - Share spreadsheet with service account email
 
-- [ ] **Step 1.3**: Create Google Spreadsheet
+- [x] **Step 1.3**: Create Google Spreadsheet
   - Create new spreadsheet
   - Create all sheets with correct columns:
     - `users`
     - `categories`
     - `transactions`
 
-- [ ] **Step 1.4**: Setup environment variables
+- [x] **Step 1.4**: Setup environment variables
   - Create `.env.local`
   - Add all required variables (see Environment Variables section)
 
-- [ ] **Step 1.5**: Setup Internationalization (i18n) 🌍
+- [x] **Step 1.5**: Setup Internationalization (i18n) 🌍
   - Install `next-intl`
   - Create `/messages/en.json` and `/messages/km.json`
   - Create `/i18n/config.ts` with locale settings
@@ -428,23 +428,23 @@ A personal budget tracker application that allows users to:
 
 ### Phase 2: Authentication (Days 3-4)
 
-- [ ] **Step 2.1**: Setup Auth.js (NextAuth v5)
+- [x] **Step 2.1**: Setup Auth.js (NextAuth v5)
   - Install `next-auth@beta`
   - Create `auth.ts` config
   - Create `app/api/auth/[...nextauth]/route.ts`
 
-- [ ] **Step 2.2**: Configure Google Provider
+- [x] **Step 2.2**: Configure Google Provider
   - Create Google OAuth credentials
   - Add to Auth.js config
   - Test Google login
 
-- [ ] **Step 2.3**: Configure Credentials Provider
+- [x] **Step 2.3**: Configure Credentials Provider
   - Install `bcrypt`
   - Create registration endpoint
   - Create login with email/password
   - Implement password hashing
 
-- [ ] **Step 2.4**: Create Auth Pages
+- [x] **Step 2.4**: Create Auth Pages
   - `/login` page
   - `/register` page
   - Protected route middleware
@@ -453,7 +453,7 @@ A personal budget tracker application that allows users to:
 
 ### Phase 3: Core Data Layer (Days 5-7)
 
-- [ ] **Step 3.1**: Google Sheets API Utility
+- [x] **Step 3.1**: Google Sheets API Utility
   - Create `lib/sheets.ts`
   - Implement CRUD helpers:
     - `getRows(sheetName, filter)`
@@ -461,12 +461,12 @@ A personal budget tracker application that allows users to:
     - `updateRow(sheetName, rowIndex, data)`
     - `deleteRow(sheetName, rowIndex)`
 
-- [ ] **Step 3.2**: Categories API
+- [x] **Step 3.2**: Categories API
   - `GET /api/categories`
   - `POST /api/categories`
   - Seed default categories
 
-- [ ] **Step 3.3**: Transactions API
+- [x] **Step 3.3**: Transactions API
   - `POST /api/transactions`
   - `GET /api/transactions` (with filters)
   - `PUT /api/transactions/[id]`
@@ -476,50 +476,53 @@ A personal budget tracker application that allows users to:
 
 ### Phase 4: User Interface (Days 8-12)
 
-- [ ] **Step 4.1**: Layout & Navigation
+- [x] **Step 4.1**: Layout & Navigation
   - Create main layout
   - Sidebar navigation
   - Header with user menu
+  - Consistent header padding (p-4) across all pages
 
-- [ ] **Step 4.2**: Dashboard Page
+- [x] **Step 4.2**: Dashboard Page
   - Income/Expense/Profit cards
   - Date range selector
-  - Charts (use Chart.js or Recharts)
-  - Top categories widget
+  - Charts (spending chart with daily/weekly/monthly views)
+  - Recent transactions widget
 
-- [ ] **Step 4.3**: Transactions Page
+- [x] **Step 4.3**: Transactions Page
   - Transaction list with filters
   - Add transaction modal/form
   - Edit/Delete functionality
   - Search & sort
 
-- [ ] **Step 4.4**: Categories Page
+- [x] **Step 4.4**: Categories Page
   - Category management
   - Add custom categories
   - Parent/child relationships
 
-- [ ] **Step 4.5**: Settings Page
+- [x] **Step 4.5**: Profile Page
   - Profile settings
-  - Currency preference
-  - Timezone settings
+  - Theme toggle (Dark/Light mode)
+  - Language selector (English/Khmer)
 
 ---
 
 ### Phase 5: Polish & Deploy (Days 13-16)
 
-- [ ] **Step 5.1**: Security Review
+- [x] **Step 5.1**: Security Review
   - Rate limiting
   - Input validation
   - userId checks on all APIs
 
-- [ ] **Step 5.2**: Performance
+- [x] **Step 5.2**: Performance
   - Caching strategies
   - Optimistic updates
-  - Loading states
+  - Loading states (skeleton loaders)
 
-- [ ] **Step 5.3**: Mobile Responsiveness
+- [x] **Step 5.3**: Mobile Responsiveness
   - Test all pages on mobile
   - Touch-friendly interactions
+  - Bottom navigation for mobile
+  - Floating action button
 
 - [ ] **Step 5.4**: Deployment
   - Deploy to Vercel
@@ -783,16 +786,16 @@ npm install @hookform/resolvers
 Ready to start implementing? Follow the build order above and tackle one step at a time:
 
 1. ✅ Read this document fully
-2. ⬜ Set up Google Cloud project & credentials
-3. ⬜ Create Google Spreadsheet with all sheets
-4. ⬜ Configure environment variables
-5. ⬜ Implement authentication
-6. ⬜ Build API routes one by one
-7. ⬜ Create UI components
-8. ⬜ Test thoroughly
+2. ✅ Set up Google Cloud project & credentials
+3. ✅ Create Google Spreadsheet with all sheets
+4. ✅ Configure environment variables
+5. ✅ Implement authentication
+6. ✅ Build API routes one by one
+7. ✅ Create UI components
+8. ✅ Test thoroughly
 9. ⬜ Deploy!
 
 ---
 
-*Document created: 2026-01-29*  
-*Last updated: 2026-01-29*
+*Document created: 2026-01-29*
+*Last updated: 2026-01-30*
